@@ -11,11 +11,11 @@ La **demanda eléctrica de corto plazo (1 hora adelante)** en una **subestación
 
 ## ¿Por qué es importante?
 - **Operación eficiente:** anticipar picos para evitar sobrecargas y maniobras reactivas.
-- **Calidad del servicio (SAIDI/SAIFI):** programar mantenimientos y gestionar eventos reduciendo frecuencia y duración de interrupciones.
+- **Calidad del servicio (SAIDI/SAIFI):** programar mantenimientos y gestionar eventos reduciendo frecuencia y duración de interrupciones.SAIFI (System Average Interruption Frequency Index) indica la frecuencia promedio de las interrupciones que un cliente experimenta en un período determinado (por ejemplo, cuántas veces se va la luz al año), y el SAIDI (System Average Interruption Duration Index) mide la duración promedio acumulada de esas interrupciones para un cliente en ese mismo período (cuánto tiempo en total está sin servicio). 
 - **Valor agregado:** entregar una **plantilla reproducible** (scripts, métricas y gráficos) que soporte decisiones operativas.
 
 ## Fuente de datos y permisos
-- **Fuente:** datos **SCADA** históricos del operador de red de una subestación específica (**2020–a la fecha**, resolución horaria).
+- **Fuente:** datos **SCADA** históricos del operador de red de una subestación específica resolución horaria.
 - **Permisos:** uso **académico** con **anonimización** de subestación y operador; **no se publican datos crudos**, solo resultados agregados y visualizaciones.
 - **Alcance:** una subestación; análisis **offline** (sin integración en tiempo real).
 

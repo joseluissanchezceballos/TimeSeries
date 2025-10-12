@@ -1,5 +1,4 @@
 presentación-del-bookdown
-contenido
 propuesta
 qué-voy-a-pronosticar
 por-qué-es-importante
