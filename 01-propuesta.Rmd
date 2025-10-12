@@ -7,39 +7,30 @@ date: "`r format(Sys.Date(), '%d de %B de %Y')`"
 # Propuesta de serie de tiempo: Predicción de demanda eléctrica a corto plazo {#propuesta}
 
 ## ¿Qué voy a pronosticar?
-La **demanda eléctrica de corto plazo (15–60 min adelante)** en una **subestación de distribución**, usando la serie de **potencia activa (kW)** en resolución **cada 15 minutos** (aprox. 2020–a la fecha).
+La **demanda eléctrica de corto plazo (1 hora adelante)** en una **subestación de distribución**, usando la serie de **potencia activa (kW)** con **resolución horaria**.
 
 ## ¿Por qué es importante?
-- **Operación eficiente**: anticipar picos para evitar sobrecargas y maniobras reactivas.
-- **Calidad del servicio**: planear mantenimientos y gestionar eventos sin afectar indicadores (SAIDI/SAIFI).
-- **Integración de DER**: coordinar generación distribuida y almacenamiento local.
-- **Valor agregado**: entregar una **plantilla reproducible** (scripts, métricas, gráficos) para adopción operativa.
-
-
-## Enfoque metodológico (resumen)
-
-1. **Exploración** (tendencia, estacionalidad diaria/semanal, ACF/PACF, outliers).
-2. **Modelado y comparación**: SARIMA/ETS y una base ML (LSTM) para patrones no lineales.
-3. **Validación** con *time series cross-validation* por bloques, horizontes **t+1…t+4** (hasta 1 hora).
-4. **Métricas**: MAE, RMSE, MAPE y errores por franja horaria/día.
-
-> Entregables: scripts R/Python, reporte de métricas, gráficos y lineamientos de despliegue *offline*.
+- **Operación eficiente:** anticipar picos para evitar sobrecargas y maniobras reactivas.
+- **Calidad del servicio (SAIDI/SAIFI):** programar mantenimientos y gestionar eventos reduciendo frecuencia y duración de interrupciones.
+- **Valor agregado:** entregar una **plantilla reproducible** (scripts, métricas y gráficos) que soporte decisiones operativas.
 
 ## Fuente de datos y permisos
-
-- **Fuente**: datos **SCADA** históricos de una empresa de servicios públicos (operador de red) para una **subestación específica**.
-- **Permiso**: **uso académico** con **anonimización** de subestación y operador; sin divulgar información sensible ni marcas.
-- **Alcance**: análisis **offline** y **una** subestación.
-- **Licencia del código**: MIT; resultados y gráficos con fines académicos.
+- **Fuente:** datos **SCADA** históricos del operador de red de una subestación específica (**2020–a la fecha**, resolución horaria).
+- **Permisos:** uso **académico** con **anonimización** de subestación y operador; **no se publican datos crudos**, solo resultados agregados y visualizaciones.
+- **Alcance:** una subestación; análisis **offline** (sin integración en tiempo real).
 
 ## Impacto esperado
-
-- **Técnico**: menor error frente a métodos manuales; soporte a decisiones operativas.
-- **Económico**: mejor uso de recursos de respaldo (ahorro operativo).
-- **Académico**: caso replicable en otras subestaciones con datos equivalentes.
+- **Técnico:** reducción de error frente a métodos manuales; soporte a decisiones en turnos.
+- **Económico:** mejor dimensionamiento de respaldo y diferimiento de inversiones.
+- **Académico:** caso replicable en otras subestaciones con datos equivalentes.
 
 ## Referencias
-
 - Hyndman, R. & Athanasopoulos (2018). *Forecasting: Principles and Practice* (3ª).
 - Box, G. et al. (2015). *Time Series Analysis: Forecasting and Control* (5ª).
 - Zhang, H. et al. (2019). “Short-term Load Forecasting Using LSTM Networks”, *IEEE TSG*.
+
+---
+
+**Herramienta TIC:** Bookdown + GitHub Pages  
+**Sitio:** https://joseluissanchezceballos.github.io/TimeSeries/propuesta.html  
+**Repo:**  https://github.com/joseluissanchezceballos/TimeSeries

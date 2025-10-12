@@ -80,10 +80,9 @@
 <ul>
 <li class="chapter" data-level="2.1" data-path="propuesta.html"><a href="propuesta.html#qu%C3%A9-voy-a-pronosticar"><i class="fa fa-check"></i><b>2.1</b> ¿Qué voy a pronosticar?</a></li>
 <li class="chapter" data-level="2.2" data-path="propuesta.html"><a href="propuesta.html#por-qu%C3%A9-es-importante"><i class="fa fa-check"></i><b>2.2</b> ¿Por qué es importante?</a></li>
-<li class="chapter" data-level="2.3" data-path="propuesta.html"><a href="propuesta.html#enfoque-metodol%C3%B3gico-resumen"><i class="fa fa-check"></i><b>2.3</b> Enfoque metodológico (resumen)</a></li>
-<li class="chapter" data-level="2.4" data-path="propuesta.html"><a href="propuesta.html#fuente-de-datos-y-permisos"><i class="fa fa-check"></i><b>2.4</b> Fuente de datos y permisos</a></li>
-<li class="chapter" data-level="2.5" data-path="propuesta.html"><a href="propuesta.html#impacto-esperado"><i class="fa fa-check"></i><b>2.5</b> Impacto esperado</a></li>
-<li class="chapter" data-level="2.6" data-path="propuesta.html"><a href="propuesta.html#referencias"><i class="fa fa-check"></i><b>2.6</b> Referencias</a></li>
+<li class="chapter" data-level="2.3" data-path="propuesta.html"><a href="propuesta.html#fuente-de-datos-y-permisos"><i class="fa fa-check"></i><b>2.3</b> Fuente de datos y permisos</a></li>
+<li class="chapter" data-level="2.4" data-path="propuesta.html"><a href="propuesta.html#impacto-esperado"><i class="fa fa-check"></i><b>2.4</b> Impacto esperado</a></li>
+<li class="chapter" data-level="2.5" data-path="propuesta.html"><a href="propuesta.html#referencias"><i class="fa fa-check"></i><b>2.5</b> Referencias</a></li>
 </ul></li>
 </ul>
 
@@ -106,53 +105,43 @@
 <h1><span class="header-section-number">2</span> Propuesta de serie de tiempo: Predicción de demanda eléctrica a corto plazo<a href="propuesta.html#propuesta" class="anchor-section" aria-label="Anchor link to header"></a></h1>
 <div id="qué-voy-a-pronosticar" class="section level2 hasAnchor" number="2.1">
 <h2><span class="header-section-number">2.1</span> ¿Qué voy a pronosticar?<a href="propuesta.html#qu%C3%A9-voy-a-pronosticar" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>La <strong>demanda eléctrica de corto plazo (15–60 min adelante)</strong> en una <strong>subestación de distribución</strong>, usando la serie de <strong>potencia activa (kW)</strong> en resolución <strong>cada 15 minutos</strong> (aprox. 2020–a la fecha).</p>
+<p>La <strong>demanda eléctrica de corto plazo (1 hora adelante)</strong> en una <strong>subestación de distribución</strong>, usando la serie de <strong>potencia activa (kW)</strong> con <strong>resolución horaria</strong>.</p>
 </div>
 <div id="por-qué-es-importante" class="section level2 hasAnchor" number="2.2">
 <h2><span class="header-section-number">2.2</span> ¿Por qué es importante?<a href="propuesta.html#por-qu%C3%A9-es-importante" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <ul>
-<li><strong>Operación eficiente</strong>: anticipar picos para evitar sobrecargas y maniobras reactivas.</li>
-<li><strong>Calidad del servicio</strong>: planear mantenimientos y gestionar eventos sin afectar indicadores (SAIDI/SAIFI).</li>
-<li><strong>Integración de DER</strong>: coordinar generación distribuida y almacenamiento local.</li>
-<li><strong>Valor agregado</strong>: entregar una <strong>plantilla reproducible</strong> (scripts, métricas, gráficos) para adopción operativa.</li>
+<li><strong>Operación eficiente:</strong> anticipar picos para evitar sobrecargas y maniobras reactivas.</li>
+<li><strong>Calidad del servicio (SAIDI/SAIFI):</strong> programar mantenimientos y gestionar eventos reduciendo frecuencia y duración de interrupciones.</li>
+<li><strong>Valor agregado:</strong> entregar una <strong>plantilla reproducible</strong> (scripts, métricas y gráficos) que soporte decisiones operativas.</li>
 </ul>
 </div>
-<div id="enfoque-metodológico-resumen" class="section level2 hasAnchor" number="2.3">
-<h2><span class="header-section-number">2.3</span> Enfoque metodológico (resumen)<a href="propuesta.html#enfoque-metodol%C3%B3gico-resumen" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<ol style="list-style-type: decimal">
-<li><strong>Exploración</strong> (tendencia, estacionalidad diaria/semanal, ACF/PACF, outliers).</li>
-<li><strong>Modelado y comparación</strong>: SARIMA/ETS y una base ML (LSTM) para patrones no lineales.</li>
-<li><strong>Validación</strong> con <em>time series cross-validation</em> por bloques, horizontes <strong>t+1…t+4</strong> (hasta 1 hora).</li>
-<li><strong>Métricas</strong>: MAE, RMSE, MAPE y errores por franja horaria/día.</li>
-</ol>
-<blockquote>
-<p>Entregables: scripts R/Python, reporte de métricas, gráficos y lineamientos de despliegue <em>offline</em>.</p>
-</blockquote>
-</div>
-<div id="fuente-de-datos-y-permisos" class="section level2 hasAnchor" number="2.4">
-<h2><span class="header-section-number">2.4</span> Fuente de datos y permisos<a href="propuesta.html#fuente-de-datos-y-permisos" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="fuente-de-datos-y-permisos" class="section level2 hasAnchor" number="2.3">
+<h2><span class="header-section-number">2.3</span> Fuente de datos y permisos<a href="propuesta.html#fuente-de-datos-y-permisos" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <ul>
-<li><strong>Fuente</strong>: datos <strong>SCADA</strong> históricos de una empresa de servicios públicos (operador de red) para una <strong>subestación específica</strong>.</li>
-<li><strong>Permiso</strong>: <strong>uso académico</strong> con <strong>anonimización</strong> de subestación y operador; sin divulgar información sensible ni marcas.</li>
-<li><strong>Alcance</strong>: análisis <strong>offline</strong> y <strong>una</strong> subestación.</li>
-<li><strong>Licencia del código</strong>: MIT; resultados y gráficos con fines académicos.</li>
+<li><strong>Fuente:</strong> datos <strong>SCADA</strong> históricos del operador de red de una subestación específica (<strong>2020–a la fecha</strong>, resolución horaria).</li>
+<li><strong>Permisos:</strong> uso <strong>académico</strong> con <strong>anonimización</strong> de subestación y operador; <strong>no se publican datos crudos</strong>, solo resultados agregados y visualizaciones.</li>
+<li><strong>Alcance:</strong> una subestación; análisis <strong>offline</strong> (sin integración en tiempo real).</li>
 </ul>
 </div>
-<div id="impacto-esperado" class="section level2 hasAnchor" number="2.5">
-<h2><span class="header-section-number">2.5</span> Impacto esperado<a href="propuesta.html#impacto-esperado" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="impacto-esperado" class="section level2 hasAnchor" number="2.4">
+<h2><span class="header-section-number">2.4</span> Impacto esperado<a href="propuesta.html#impacto-esperado" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <ul>
-<li><strong>Técnico</strong>: menor error frente a métodos manuales; soporte a decisiones operativas.</li>
-<li><strong>Económico</strong>: mejor uso de recursos de respaldo (ahorro operativo).</li>
-<li><strong>Académico</strong>: caso replicable en otras subestaciones con datos equivalentes.</li>
+<li><strong>Técnico:</strong> reducción de error frente a métodos manuales; soporte a decisiones en turnos.</li>
+<li><strong>Económico:</strong> mejor dimensionamiento de respaldo y diferimiento de inversiones.</li>
+<li><strong>Académico:</strong> caso replicable en otras subestaciones con datos equivalentes.</li>
 </ul>
 </div>
-<div id="referencias" class="section level2 hasAnchor" number="2.6">
-<h2><span class="header-section-number">2.6</span> Referencias<a href="propuesta.html#referencias" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="referencias" class="section level2 hasAnchor" number="2.5">
+<h2><span class="header-section-number">2.5</span> Referencias<a href="propuesta.html#referencias" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <ul>
 <li>Hyndman, R. &amp; Athanasopoulos (2018). <em>Forecasting: Principles and Practice</em> (3ª).</li>
 <li>Box, G. et al. (2015). <em>Time Series Analysis: Forecasting and Control</em> (5ª).</li>
 <li>Zhang, H. et al. (2019). “Short-term Load Forecasting Using LSTM Networks”, <em>IEEE TSG</em>.</li>
 </ul>
+<hr />
+<p><strong>Herramienta TIC:</strong> Bookdown + GitHub Pages<br />
+<strong>Sitio:</strong> <a href="https://joseluissanchezceballos.github.io/TimeSeries/propuesta.html" class="uri">https://joseluissanchezceballos.github.io/TimeSeries/propuesta.html</a><br />
+<strong>Repo:</strong> <a href="https://github.com/joseluissanchezceballos/TimeSeries" class="uri">https://github.com/joseluissanchezceballos/TimeSeries</a></p>
 
 </div>
 </div>
