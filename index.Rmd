@@ -1,0 +1,36 @@
+---
+title: "Bookdown — Pronóstico de Series de Tiempo"
+subtitle: "Maestría en Ciencia de Datos"
+author:
+  - "Fredy Alejandro Ordoñez Márquez"
+  - "Oscar Fernando Velásquez Chala"
+  - "José Luis Sánchez Ceballos"
+date: "`r format(Sys.Date(), '%d de %B de %Y')`"
+site: bookdown::bookdown_site
+output:
+  bookdown::gitbook:
+    css: style.css
+    split_by: chapter
+    config:
+      toc:
+        collapse: subsection
+        toc_depth: 2
+      sharing: false
+      download: ["pdf", "epub"]
+---
+
+# Presentación del Bookdown
+
+Este **Bookdown** recopila las actividades desarrolladas a lo largo del curso de **Series de Tiempo**.  
+Cada capítulo corresponde a una entrega o avance del proyecto, permitiendo evidenciar el progreso del análisis, los modelos aplicados y las conclusiones del trabajo final.
+
+## Contenido
+
+1. **Propuesta inicial**: Definición del tipo de información, justificación y fuente de datos.  
+2. *(Próximamente)* Análisis exploratorio de los datos.  
+3. *(Próximamente)* Modelos de pronóstico (ARIMA/SARIMA, ETS, LSTM, Prophet, etc.).  
+4. *(Próximamente)* Evaluación de resultados, comparación de métricas y conclusiones.
+
+```{r echo=FALSE}
+NULL
+```
