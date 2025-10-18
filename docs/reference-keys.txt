@@ -5,3 +5,4 @@ por-qué-es-importante
 fuente-de-datos-y-permisos
 impacto-esperado
 referencias
+Estructura

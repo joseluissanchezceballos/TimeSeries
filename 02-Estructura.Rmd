@@ -1,0 +1,266 @@
+# Análisis exploratorio de una serie de tiempo (MA, rezagos y estacionalidad) {#Estructura}
+
+1. Carga de librerías y datos
+```{r}
+library(readr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(stringr)
+library(lubridate) # uso explícito (parseo, wday, hour, etc.)
+library(zoo) # uso explícito (zoo, rollmean, lag)
+library(forecast) # ACF/PACF, ggseasonplot, ggsubseriesplot, autoplot.ts
+```
+1.1 Lectura del CSV
+```{r}
+csv_dir  <- "C:/Users/Lenovo/PUJ Cali/OSCAR VELASQUEZ CHALA - Proyecto Aplicado - Proy. Demanda Electrica/2. Fuentes de Datos"
+csv_name <- "015 SOLO POTENCIA PARA SUBI A BOOKDOWN.csv"
+csv_path <- file.path(csv_dir, csv_name)
+df <- tryCatch(
+readr::read_csv(csv_path, show_col_types = FALSE),
+error = function(e) readr::read_csv2(csv_path, show_col_types = FALSE)
+)
+glimpse(df)
+
+```
+```{r}
+time_col <- "FECHA" 
+y_col <- "VALOR_IMPUTADO"
+
+```
+2) Lectura y preparación
+```{r}
+df <- tryCatch(
+readr::read_csv(csv_path, show_col_types = FALSE),
+error = function(e) readr::read_csv2(csv_path, show_col_types = FALSE)
+)
+stopifnot("No existe la columna FECHA" = time_col %in% names(df))
+stopifnot("No existe la columna VALOR_IMPUTADO" = y_col %in% names(df))
+glimpse(df)
+```
+Parseo de fecha/hora con lubridate (zona: America/Bogota)
+```{r}
+dat <- df %>%
+transmute(
+.t_raw = .data[[time_col]],
+.t = suppressWarnings(
+lubridate::parse_date_time(.t_raw,
+orders = c("Ymd HMS","Ymd HM","Ymd",
+"dmY HMS","dmY HM","dmY",
+"dmy HMS","dmy HM","dmy",
+"YmdT","YmdH","YmdHMS"),
+tz = "America/Bogota")
+),
+y = as.numeric(.data[[y_col]])
+) %>%
+mutate(
+# Si arriba quedó NA, intenta Date simple
+.t = ifelse(is.na(.t),
+as.POSIXct(as.Date(.t_raw), tz = "America/Bogota"),
+.t),
+.t = as.POSIXct(.t, tz = "America/Bogota")
+) %>%
+filter(!is.na(.t), !is.na(y)) %>%
+arrange(.t)
+
+
+
+
+stopifnot("No hay observaciones válidas" = nrow(dat) > 1)
+
+
+
+
+summary(dat$y); range(dat$.t)
+
+```
+3) Clase Date y granularidad
+```{r}
+dat <- dat %>%
+mutate(date = as.Date(.t))
+# Diferencia mediana entre timestamps para inferir frecuencia
+dt_med <- median(diff(dat$.t))
+dt_med
+
+```
+
+```{r}
+infer_freq <- function(dt) {
+secs <- as.numeric(dt, units = "secs")
+if (is.na(secs) || secs <= 0) return(list(freq = 1, label = "sin_frecuencia"))
+if (abs(secs - 60*60*24) < 1)   return(list(freq = 365, label = "diaria"))
+if (abs(secs - 60*60) < 1)      return(list(freq = 24,  label = "horaria"))
+if (abs(secs - 60*30) < 1)      return(list(freq = 48,  label = "cada_30_min"))
+if (abs(secs - 60*15) < 1)      return(list(freq = 96,  label = "cada_15_min"))
+if (abs(secs - 60*5) < 1)       return(list(freq = 288, label = "cada_5_min"))
+list(freq = 1, label = "otra")
+}
+
+gran <- infer_freq(dt_med)
+gran
+
+```
+4) Serie como zoo y como ts
+```{r}
+# Objeto zoo (requerido)
+
+z <- zoo::zoo(dat$y, order.by = dat$.t)
+
+# Objeto ts (requerido)
+
+freq <- gran$freq
+ts_label <- gran$label
+
+# Heurística "mensual": si hay múltiples observaciones por mes, agregamos a promedio mensual
+
+looks_monthly <- {
+ym <- zoo::as.yearmon(dat$.t)
+length(unique(ym)) < nrow(dat) && length(unique(ym)) >= 6
+}
+
+if (looks_monthly) {
+ym <- zoo::as.yearmon(dat$.t)
+monthly <- aggregate(dat$y, by = list(ym = ym), FUN = mean, na.rm = TRUE) %>%
+arrange(ym)
+ts_y <- ts(monthly$x, frequency = 12,
+start = c(year(as.Date(as.yearmon(monthly$ym[1]))),
+month(as.Date(as.yearmon(monthly$ym[1])))))
+ts_label <- "mensual"
+} else {
+ts_y <- ts(dat$y, frequency = max(1, freq))
+}
+
+list(class_zoo = class(z), class_ts = class(ts_y), freq_ts = frequency(ts_y), etiqueta = ts_label)
+
+```
+
+5) Visualización base
+
+```{r}
+autoplot(ts_y) +
+labs(title = paste("Serie temporal (freq:", frequency(ts_y), "-", ts_label, ")"),
+x = "Tiempo", y = y_col) +
+theme_minimal()
+
+```
+6) Promedio móvil (Moving Average)
+
+Ventanas sugeridas según granularidad:
+
+15-min: 96 (≈1 día) • Horaria: 24 (≈1 día) • Diaria: 7 (≈1 semana) • Mensual: 12 (≈1 año).
+
+```{r}
+k <- dplyr::case_when(
+frequency(ts_y) >= 288 ~ 288,
+frequency(ts_y) >= 96  ~ 96,
+frequency(ts_y) >= 24  ~ 24,
+frequency(ts_y) >= 12  ~ 12,
+frequency(ts_y) >= 7   ~ 7,
+TRUE ~ 5
+)
+
+ma <- zoo::rollmean(z, k = k, align = "right", fill = NA)
+
+ma_df <- tibble(
+.t = index(z),
+y  = coredata(z),
+ma = as.numeric(ma)
+)
+
+ggplot(ma_df, aes(.t, y)) +
+geom_line(alpha = 0.7) +
+geom_line(aes(y = ma), linewidth = 1) +
+labs(title = paste0("Promedio móvil (k = ", k, ")"),
+x = "Tiempo", y = y_col) +
+theme_minimal()
+
+```
+7) Rezagos (lags) y autocorrelación
+```{r}
+
+h <- min(48, max(12, frequency(ts_y))) # horizonte para ACF/PACF 
+lk <- min(24, h)
+
+# Crea los rezagos correctamente
+lz1 <- dplyr::lag(coredata(z), 1)     # y_{t-1}
+lzk <- dplyr::lag(coredata(z), lk)    # y_{t-lk}
+
+# Construye el tibble y elimina NA
+lag_df <- tibble(
+  y_t  = coredata(z),
+  y_l1 = lz1,
+  y_lk = lzk
+) %>% drop_na()
+
+# Gráficos
+p1 <- ggplot(lag_df, aes(y_l1, y_t)) +
+  geom_point(alpha=.35) +
+  labs(title = "Lag plot: y[t] vs y[t-1]",
+       x = expression(y[t-1]), y = expression(y[t])) +
+  theme_minimal()
+
+p2 <- ggplot(lag_df, aes(y_lk, y_t)) +
+  geom_point(alpha=.35) +
+  labs(title = paste0("Lag plot: y[t] vs y[t-", lk, "]"),
+       x = bquote(y[t-.(lk)]), y = expression(y[t])) +
+  theme_minimal()
+
+p1; p2
+
+
+```
+8) Estacionalidad
+Si frequency(ts_y) > 1, aplicamos STL y plots estacionales. Si no, mostramos patrones por calendario con lubridate.
+
+```{r}
+if (frequency(ts_y) > 1) {
+stl_fit <- stl(ts_y, s.window = "periodic", robust = TRUE)
+autoplot(stl_fit) + theme_minimal()
+} else {
+cat("No se detectó frecuencia > 1 para STL.\n")
+}
+
+```
+```{r}
+if (frequency(ts_y) > 1) {
+forecast::ggseasonplot(ts_y, year.labels = TRUE, year.labels.left = TRUE) +
+theme_minimal() + ggtitle("Gráfico estacional (ggseasonplot)")
+
+forecast::ggsubseriesplot(ts_y) +
+theme_minimal() + ggtitle("Subseries estacionales")
+} else {
+aux <- dat %>%
+mutate(
+dow = wday(.t, label = TRUE, week_start = 1),
+hod = hour(.t)
+)
+
+ggplot(aux, aes(dow, y)) +
+geom_boxplot() +
+labs(title = "Distribución por día de semana", x = "Día de semana", y = y_col) +
+theme_minimal()
+
+if (dplyr::n_distinct(aux$hod) > 1) {
+ggplot(aux, aes(hod, y)) +
+stat_summary(fun = mean, geom = "line") +
+labs(title = "Promedio por hora del día", x = "Hora", y = y_col) +
+theme_minimal()
+}
+}
+
+```
+9) Resumen y próximos pasos
+```{r}
+cat("**Frecuencia (ts):**", frequency(ts_y), " | **Etiqueta:**", ts_label, "\n\n")
+cat("- Se graficó la serie y su **promedio móvil** (k =", k, ").\n")
+cat("- Se exploraron **rezagos** (lag-1 y lag-", lk, ") y **ACF/PACF**.\n", sep = "")
+if (frequency(ts_y) > 1) {
+cat("- **Estacionalidad**: STL + seasonplot/subseries.\n")
+} else {
+cat("- Sin frecuencia estacional; se mostraron patrones por calendario (lubridate).\n")
+}
+cat("\n**Siguiente paso:** resamplear a granularidad fija, preparar *train/test* y validación temporal con orígenes rodantes.\n")
+
+```
+
+
