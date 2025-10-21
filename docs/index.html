@@ -146,7 +146,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="2.4" data-path="propuesta.html"><a href="propuesta.html#impacto-esperado"><i class="fa fa-check"></i><b>2.4</b> Impacto esperado</a></li>
 <li class="chapter" data-level="2.5" data-path="propuesta.html"><a href="propuesta.html#referencias"><i class="fa fa-check"></i><b>2.5</b> Referencias</a></li>
 </ul></li>
-<li class="chapter" data-level="3" data-path="Estructura.html"><a href="Estructura.html"><i class="fa fa-check"></i><b>3</b> Análisis exploratorio de una serie de tiempo (MA, rezagos y estacionalidad)</a></li>
+<li class="chapter" data-level="3" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><i class="fa fa-check"></i><b>3</b> Análisis de Serie de Tiempo: Potencia Eléctrica Horaria</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#contexto-y-objetivos"><i class="fa fa-check"></i><b>3.1</b> Contexto y objetivos</a></li>
+<li class="chapter" data-level="3.2" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#cargue-de-librer%C3%ADas"><i class="fa fa-check"></i><b>3.2</b> Cargue de Librerías</a></li>
+<li class="chapter" data-level="3.3" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#lectura-y-preparaci%C3%B3n-de-los-datos"><i class="fa fa-check"></i><b>3.3</b> Lectura y preparación de los datos</a></li>
+<li class="chapter" data-level="3.4" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#funciones-auxiliares-de-visualizaci%C3%B3n-de-la-serie-de-tiempo"><i class="fa fa-check"></i><b>3.4</b> Funciones auxiliares de visualización de la serie de tiempo</a></li>
+<li class="chapter" data-level="3.5" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#vista-general-del-comportamiento-de-la-potencia-el%C3%A9ctrica-por-escalas-diaria-semanal-mensual-anual"><i class="fa fa-check"></i><b>3.5</b> Vista general del comportamiento de la potencia eléctrica por escalas (diaria, semanal, mensual, anual)</a></li>
+<li class="chapter" data-level="3.6" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#curvas-de-potencia-el%C3%A9ctrica-por-periodo-d%C3%ADa-semana-mes-a%C3%B1o"><i class="fa fa-check"></i><b>3.6</b> Curvas de potencia eléctrica por periodo (día, semana, mes, año)</a></li>
+<li class="chapter" data-level="3.7" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#promedios-m%C3%B3viles"><i class="fa fa-check"></i><b>3.7</b> Promedios móviles</a></li>
+<li class="chapter" data-level="3.8" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#rezagos-lags-y-autocorrelaci%C3%B3n"><i class="fa fa-check"></i><b>3.8</b> Rezagos (lags) y autocorrelación</a></li>
+<li class="chapter" data-level="3.9" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#estacionalidad-gr%C3%A1ficos-y-descomposici%C3%B3n"><i class="fa fa-check"></i><b>3.9</b> Estacionalidad (gráficos y descomposición)</a></li>
+<li class="chapter" data-level="3.10" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#indicadores-resumidos"><i class="fa fa-check"></i><b>3.10</b> Indicadores resumidos</a></li>
+<li class="chapter" data-level="3.11" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#conclusiones"><i class="fa fa-check"></i><b>3.11</b> Conclusiones</a></li>
+</ul></li>
 </ul>
 
       </nav>
@@ -168,7 +181,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h1 class="title">Propuesta de serie de tiempo: Predicción de demanda eléctrica a corto plazo</h1>
 <h2 class="subtitle"><em>Maestría en Ciencia de Datos</em></h2>
 <p class="author"><em>Fredy A. Ordoñez · Oscar F. Velásquez · José L. Sánchez</em></p>
-<p class="date"><em>18 de octubre de 2025</em></p>
+<p class="date"><em>20 de octubre de 2025</em></p>
 </div>
 <div id="presentación-del-bookdown" class="section level1 hasAnchor" number="1">
 <h1><span class="header-section-number">1</span> Presentación del Bookdown<a href="index.html#presentaci%C3%B3n-del-bookdown" class="anchor-section" aria-label="Anchor link to header"></a></h1>

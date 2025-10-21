@@ -1,266 +1,476 @@
-# Análisis exploratorio de una serie de tiempo (MA, rezagos y estacionalidad) {#Estructura}
+# Análisis de Serie de Tiempo: Potencia Eléctrica Horaria
 
-1. Carga de librerías y datos
-```{r}
+## Contexto y objetivos
+
+El estudio analiza una serie temporal de potencia eléctrica horaria entre 2018 y 2025.
+
+El objetivo fue detectar patrones, ciclos y estacionalidades usando herramientas de R (lubridate, zoo, forecast) y visualizar la calidad de los datos (huecos, tendencias, estacionalidad, rezagos).
+
+El conjunto de datos es altamente completo:
+
+-   Completitud global: 99.48%.
+
+-   Años con menos completitud: 2019 (97.9%) y 2021 (99.4%).
+
+-   Años recientes (2022–2025): 100% de registros, sin huecos.
+
+La idea es detectar **patrones y ciclos** del comportamiento de la potencia eléctrica.
+
+## Cargue de Librerías
+
+```{r libs, warning=FALSE}
 library(readr)
 library(dplyr)
 library(tidyr)
+library(lubridate)
 library(ggplot2)
-library(stringr)
-library(lubridate) # uso explícito (parseo, wday, hour, etc.)
-library(zoo) # uso explícito (zoo, rollmean, lag)
-library(forecast) # ACF/PACF, ggseasonplot, ggsubseriesplot, autoplot.ts
+library(scales)
+library(zoo)         
+library(forecast)    
 ```
-1.1 Lectura del CSV
-```{r}
+
+## Lectura y preparación de los datos
+
+```{r read, warning=FALSE}
 csv_dir  <- "C:/Users/Lenovo/PUJ Cali/OSCAR VELASQUEZ CHALA - Proyecto Aplicado - Proy. Demanda Electrica/2. Fuentes de Datos"
 csv_name <- "015 SOLO POTENCIA PARA SUBI A BOOKDOWN.csv"
 csv_path <- file.path(csv_dir, csv_name)
+time_col <- "FECHA"
+y_col    <- "VALOR_IMPUTADO"
+TZ       <- "America/Bogota"
+
+# Lectura robusta
 df <- tryCatch(
-readr::read_csv(csv_path, show_col_types = FALSE),
-error = function(e) readr::read_csv2(csv_path, show_col_types = FALSE)
-)
-glimpse(df)
-
-```
-```{r}
-time_col <- "FECHA" 
-y_col <- "VALOR_IMPUTADO"
-
-```
-2) Lectura y preparación
-```{r}
-df <- tryCatch(
-readr::read_csv(csv_path, show_col_types = FALSE),
-error = function(e) readr::read_csv2(csv_path, show_col_types = FALSE)
-)
-stopifnot("No existe la columna FECHA" = time_col %in% names(df))
-stopifnot("No existe la columna VALOR_IMPUTADO" = y_col %in% names(df))
-glimpse(df)
-```
-Parseo de fecha/hora con lubridate (zona: America/Bogota)
-```{r}
-dat <- df %>%
-transmute(
-.t_raw = .data[[time_col]],
-.t = suppressWarnings(
-lubridate::parse_date_time(.t_raw,
-orders = c("Ymd HMS","Ymd HM","Ymd",
-"dmY HMS","dmY HM","dmY",
-"dmy HMS","dmy HM","dmy",
-"YmdT","YmdH","YmdHMS"),
-tz = "America/Bogota")
-),
-y = as.numeric(.data[[y_col]])
-) %>%
-mutate(
-# Si arriba quedó NA, intenta Date simple
-.t = ifelse(is.na(.t),
-as.POSIXct(as.Date(.t_raw), tz = "America/Bogota"),
-.t),
-.t = as.POSIXct(.t, tz = "America/Bogota")
-) %>%
-filter(!is.na(.t), !is.na(y)) %>%
-arrange(.t)
-
-
-
-
-stopifnot("No hay observaciones válidas" = nrow(dat) > 1)
-
-
-
-
-summary(dat$y); range(dat$.t)
-
-```
-3) Clase Date y granularidad
-```{r}
-dat <- dat %>%
-mutate(date = as.Date(.t))
-# Diferencia mediana entre timestamps para inferir frecuencia
-dt_med <- median(diff(dat$.t))
-dt_med
-
-```
-
-```{r}
-infer_freq <- function(dt) {
-secs <- as.numeric(dt, units = "secs")
-if (is.na(secs) || secs <= 0) return(list(freq = 1, label = "sin_frecuencia"))
-if (abs(secs - 60*60*24) < 1)   return(list(freq = 365, label = "diaria"))
-if (abs(secs - 60*60) < 1)      return(list(freq = 24,  label = "horaria"))
-if (abs(secs - 60*30) < 1)      return(list(freq = 48,  label = "cada_30_min"))
-if (abs(secs - 60*15) < 1)      return(list(freq = 96,  label = "cada_15_min"))
-if (abs(secs - 60*5) < 1)       return(list(freq = 288, label = "cada_5_min"))
-list(freq = 1, label = "otra")
-}
-
-gran <- infer_freq(dt_med)
-gran
-
-```
-4) Serie como zoo y como ts
-```{r}
-# Objeto zoo (requerido)
-
-z <- zoo::zoo(dat$y, order.by = dat$.t)
-
-# Objeto ts (requerido)
-
-freq <- gran$freq
-ts_label <- gran$label
-
-# Heurística "mensual": si hay múltiples observaciones por mes, agregamos a promedio mensual
-
-looks_monthly <- {
-ym <- zoo::as.yearmon(dat$.t)
-length(unique(ym)) < nrow(dat) && length(unique(ym)) >= 6
-}
-
-if (looks_monthly) {
-ym <- zoo::as.yearmon(dat$.t)
-monthly <- aggregate(dat$y, by = list(ym = ym), FUN = mean, na.rm = TRUE) %>%
-arrange(ym)
-ts_y <- ts(monthly$x, frequency = 12,
-start = c(year(as.Date(as.yearmon(monthly$ym[1]))),
-month(as.Date(as.yearmon(monthly$ym[1])))))
-ts_label <- "mensual"
-} else {
-ts_y <- ts(dat$y, frequency = max(1, freq))
-}
-
-list(class_zoo = class(z), class_ts = class(ts_y), freq_ts = frequency(ts_y), etiqueta = ts_label)
-
-```
-
-5) Visualización base
-
-```{r}
-autoplot(ts_y) +
-labs(title = paste("Serie temporal (freq:", frequency(ts_y), "-", ts_label, ")"),
-x = "Tiempo", y = y_col) +
-theme_minimal()
-
-```
-6) Promedio móvil (Moving Average)
-
-Ventanas sugeridas según granularidad:
-
-15-min: 96 (≈1 día) • Horaria: 24 (≈1 día) • Diaria: 7 (≈1 semana) • Mensual: 12 (≈1 año).
-
-```{r}
-k <- dplyr::case_when(
-frequency(ts_y) >= 288 ~ 288,
-frequency(ts_y) >= 96  ~ 96,
-frequency(ts_y) >= 24  ~ 24,
-frequency(ts_y) >= 12  ~ 12,
-frequency(ts_y) >= 7   ~ 7,
-TRUE ~ 5
+  readr::read_csv(csv_path, show_col_types = FALSE),
+  error = function(e) readr::read_csv2(csv_path, show_col_types = FALSE)
 )
 
-ma <- zoo::rollmean(z, k = k, align = "right", fill = NA)
+stopifnot(time_col %in% names(df), y_col %in% names(df))
 
-ma_df <- tibble(
-.t = index(z),
-y  = coredata(z),
-ma = as.numeric(ma)
+# Parseo de fechas (varios formatos)
+df[[time_col]] <- parse_date_time(
+  df[[time_col]],
+  orders = c("ymd HMS","ymd HM","dmy HMS","dmy HM","ymd","dmy"),
+  tz = TZ
 )
 
-ggplot(ma_df, aes(.t, y)) +
-geom_line(alpha = 0.7) +
-geom_line(aes(y = ma), linewidth = 1) +
-labs(title = paste0("Promedio móvil (k = ", k, ")"),
-x = "Tiempo", y = y_col) +
-theme_minimal()
+# A numérico
+df[[y_col]] <- suppressWarnings(readr::parse_number(as.character(df[[y_col]])))
 
+# Malla horaria completa (sin imputar, para marcar huecos)
+df0 <- df %>% filter(!is.na(.data[[time_col]])) %>% select(!!time_col, !!y_col) %>% arrange(.data[[time_col]])
+full_time <- tibble(!!time_col := seq(min(df0[[time_col]]), max(df0[[time_col]]), by = "1 hour"))
+
+df_full <- full_time %>%
+  left_join(df0, by = time_col) %>%
+  mutate(is_na = is.na(.data[[y_col]])) %>%
+  arrange(.data[[time_col]])
+
+summary(df_full[[y_col]])
+cat("Proporción de NA:", mean(is.na(df_full[[y_col]])), "\n")
 ```
-7) Rezagos (lags) y autocorrelación
-```{r}
 
-h <- min(48, max(12, frequency(ts_y))) # horizonte para ACF/PACF 
-lk <- min(24, h)
+## Funciones auxiliares de visualización de la serie de tiempo
 
-# Crea los rezagos correctamente
-lz1 <- dplyr::lag(coredata(z), 1)     # y_{t-1}
-lzk <- dplyr::lag(coredata(z), lk)    # y_{t-lk}
-
-# Construye el tibble y elimina NA
-lag_df <- tibble(
-  y_t  = coredata(z),
-  y_l1 = lz1,
-  y_lk = lzk
-) %>% drop_na()
-
-# Gráficos
-p1 <- ggplot(lag_df, aes(y_l1, y_t)) +
-  geom_point(alpha=.35) +
-  labs(title = "Lag plot: y[t] vs y[t-1]",
-       x = expression(y[t-1]), y = expression(y[t])) +
-  theme_minimal()
-
-p2 <- ggplot(lag_df, aes(y_lk, y_t)) +
-  geom_point(alpha=.35) +
-  labs(title = paste0("Lag plot: y[t] vs y[t-", lk, "]"),
-       x = bquote(y[t-.(lk)]), y = expression(y[t])) +
-  theme_minimal()
-
-p1; p2
-
-
-```
-8) Estacionalidad
-Si frequency(ts_y) > 1, aplicamos STL y plots estacionales. Si no, mostramos patrones por calendario con lubridate.
-
-```{r}
-if (frequency(ts_y) > 1) {
-stl_fit <- stl(ts_y, s.window = "periodic", robust = TRUE)
-autoplot(stl_fit) + theme_minimal()
-} else {
-cat("No se detectó frecuencia > 1 para STL.\n")
+```{r helpers, warning=FALSE}
+# Unir horas NA contiguas en bandas
+na_spans_runs <- function(x_time, is_na_logical) {
+  r  <- rle(is_na_logical)
+  ed <- cumsum(r$lengths); st <- ed - r$lengths + 1
+  tibble(is_na = r$values, i_start = st, i_end = ed) %>%
+    dplyr::filter(is_na) %>%
+    transmute(xmin = x_time[i_start], xmax = x_time[i_end] + hours(1))
 }
 
+# Agregación genérica sin imputar
+tagrega <- function(data, unit, time_col, y_col, tz = TZ) {
+  data %>%
+    mutate(period = floor_date(.data[[time_col]], unit)) %>%
+    group_by(period) %>%
+    summarise(value = mean(.data[[y_col]], na.rm = TRUE), .groups = "drop")
+}
 ```
-```{r}
-if (frequency(ts_y) > 1) {
-forecast::ggseasonplot(ts_y, year.labels = TRUE, year.labels.left = TRUE) +
-theme_minimal() + ggtitle("Gráfico estacional (ggseasonplot)")
 
-forecast::ggsubseriesplot(ts_y) +
-theme_minimal() + ggtitle("Subseries estacionales")
-} else {
-aux <- dat %>%
-mutate(
-dow = wday(.t, label = TRUE, week_start = 1),
-hod = hour(.t)
+## Vista general del comportamiento de la potencia eléctrica por escalas (diaria, semanal, mensual, anual)
+
+```{r multi-facets, fig.height=8, warning=FALSE}
+na_runs <- na_spans_runs(df_full[[time_col]], df_full$is_na)
+
+plot_df <- bind_rows(
+  tagrega(df_full, "day",   time_col, y_col) %>% mutate(freq = "Diaria"),
+  tagrega(df_full, "week",  time_col, y_col) %>% mutate(freq = "Semanal"),
+  tagrega(df_full, "month", time_col, y_col) %>% mutate(freq = "Mensual"),
+  tagrega(df_full, "year",  time_col, y_col) %>% mutate(freq = "Anual")
+) %>% mutate(freq = factor(freq, levels = c("Diaria","Semanal","Mensual","Anual")))
+
+ggplot() +
+  geom_rect(data = na_runs,
+            aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf),
+            inherit.aes = FALSE, fill = "red", alpha = 0.25) +
+  geom_line(data = plot_df,
+            aes(x = period, y = value), linewidth = 0.7, na.rm = TRUE) +
+  facet_wrap(~ freq, scales = "free_x", ncol = 2) +
+  scale_x_datetime(labels = date_format("%Y"), date_breaks = "1 year") +
+  labs(title = "Potencia con huecos (NA)",
+       subtitle = "Bandas rojas = periodos con NA en la serie horaria original",
+       x = "Tiempo", y = "Potencia") +
+  theme_minimal(base_size = 11)
+```
+
+
+* **Curva de Potencia Diaria**: muestra alta variabilidad horaria con picos bien definidos, evidenciando que la potencia cambia fuertemente a lo largo del día.
+
+* **Curva de Potencia Semanal**: suaviza los ciclos, pero aún se aprecian repeticiones cada pocos días, sugiriendo un patrón operativo estable.
+
+* **Curva de Potencia Mensual**: las oscilaciones se atenúan, revelando la tendencia global; los huecos rojos (NA) se observan concentrados en pocos periodos.
+
+* **Curva de Potencia Anual**: la línea muestra el comportamiento global a largo rango: valores medios estables sin deriva significativa, lo que sugiere una operación controlada y sin aumento sostenido del consumo.
+
+**La serie mantiene un patrón estacional fuerte (diario y semanal) y una tendencia global estacionaria. Los huecos (en rojo) son mínimos y no distorsionan las medias agregadas.**
+
+## Curvas de potencia eléctrica por periodo (día, semana, mes, año)
+
+```{r period-curves, fig.height=6, warning=FALSE}
+# Día
+dia_obj <- as.Date("2023-02-01")
+ini_dia <- as.POSIXct(dia_obj, tz = TZ); fin_dia <- ini_dia + days(1)
+
+df_day <- df_full %>% filter(.data[[time_col]] >= ini_dia, .data[[time_col]] < fin_dia)
+na_day <- na_spans_runs(df_day[[time_col]], df_day$is_na)
+
+g_day <- ggplot() +
+  geom_rect(data = na_day, aes(xmin = xmin, xmax = xmax, ymin=-Inf, ymax=Inf),
+            inherit.aes = FALSE, fill="red", alpha = 0.35) +
+  geom_line(data = filter(df_day, !is_na), aes_string(x=time_col, y=y_col), linewidth=0.8) +
+  scale_x_datetime(limits=c(ini_dia, fin_dia), date_labels="%H:%M", breaks=seq(ini_dia, fin_dia, by="2 hour")) +
+  labs(title=paste0("Curva horaria — ", dia_obj), x="Hora", y="Potencia") + theme_minimal()
+
+g_day
+```
+
+* Día: **1 febrero 2023**:Curva con forma sinusoidal: potencia baja en la madrugada, aumento progresivo durante el día, pico en horas centrales y descenso nocturno. Refleja un ciclo operativo típico diario.
+
+```{r warning=FALSE}
+# Semana
+semana_ref <- as.Date("2021-02-01")
+ini_sem <- as.POSIXct(floor_date(semana_ref, "week", week_start=1), tz=TZ)
+fin_sem <- ini_sem + weeks(1)
+
+df_week <- df_full %>% filter(.data[[time_col]] >= ini_sem, .data[[time_col]] < fin_sem)
+na_week <- na_spans_runs(df_week[[time_col]], df_week$is_na)
+
+g_week <- ggplot() +
+  geom_rect(data = na_week, aes(xmin = xmin, xmax = xmax, ymin=-Inf, ymax=Inf),
+            inherit.aes = FALSE, fill="red", alpha = 0.35) +
+  geom_line(data = filter(df_week, !is_na), aes_string(x=time_col, y=y_col), linewidth=0.8) +
+  scale_x_datetime(limits=c(ini_sem, fin_sem), date_labels="%a %d", breaks=seq(ini_sem, fin_sem, by="1 day")) +
+  labs(title=paste0("Semana del ", ini_sem), x="Fecha", y="Potencia") + theme_minimal()
+
+g_week
+```
+
+* Semana: **1–7 febrero 2021**: Repetición diaria clara, pero con leves diferencias entre días. Puede reflejar cambios de carga entre jornadas laborales y fines de semana.
+
+```{r warning=FALSE}
+# Mes
+mes_ref <- as.Date("2021-02-01")
+ini_mes <- as.POSIXct(floor_date(mes_ref, "month"), tz=TZ); fin_mes <- as.POSIXct(ceiling_date(mes_ref, "month"), tz=TZ)
+
+df_month <- df_full %>% filter(.data[[time_col]] >= ini_mes, .data[[time_col]] < fin_mes)
+na_month <- na_spans_runs(df_month[[time_col]], df_month$is_na)
+
+g_month <- ggplot() +
+  geom_rect(data = na_month, aes(xmin = xmin, xmax = xmax, ymin=-Inf, ymax=Inf),
+            inherit.aes = FALSE, fill="red", alpha = 0.25) +
+  geom_line(data = filter(df_month, !is_na), aes_string(x=time_col, y=y_col), linewidth=0.6) +
+  scale_x_datetime(limits=c(ini_mes, fin_mes), date_labels="%d-%b", breaks=seq(ini_mes, fin_mes, by="3 days")) +
+  labs(title=paste0("Mes ", format(ini_mes, '%Y-%m')), x="Fecha", y="Potencia") + theme_minimal()
+
+g_month
+```
+
+* Mes: **febrero 2021**: Patrón reiterado de picos semanales. Los huecos rojos (NA) marcan interrupciones puntuales sin afectar la tendencia global.
+
+```{r warning=FALSE}
+# Año (panel único)
+anio_ref <- 2021
+ini_anio <- as.POSIXct(ymd(paste0(anio_ref, "-01-01")), tz=TZ); fin_anio <- as.POSIXct(ymd(paste0(anio_ref+1, "-01-01")), tz=TZ)
+
+df_year <- df_full %>% filter(.data[[time_col]] >= ini_anio, .data[[time_col]] < fin_anio)
+na_year <- na_spans_runs(df_year[[time_col]], df_year$is_na)
+
+g_year <- ggplot() +
+  geom_rect(data = na_year, aes(xmin = xmin, xmax = xmax, ymin=-Inf, ymax=Inf),
+            inherit.aes = FALSE, fill="red", alpha = 0.20) +
+  geom_line(data = filter(df_year, !is_na), aes_string(x=time_col, y=y_col), linewidth=0.3) +
+  scale_x_datetime(limits=c(ini_anio, fin_anio), date_labels="%b", breaks=seq(ini_anio, fin_anio, by="1 month")) +
+  labs(title=paste0("Año ", anio_ref), x="Mes", y="Potencia") + theme_minimal()
+
+g_year
+```
+
+* Año: **2021**: Oscilaciones estacionales sin tendencia definida. No se observan desviaciones estructurales.
+
+**A nivel temporal, la potencia responde a ciclos regulares con comportamiento casi periódico.**
+
+## Promedios móviles
+
+Promedios móviles sobre la **serie horaria** (imputada solo para continuidad visual con `na.interp`).
+
+```{r warning=FALSE}
+# --- Promedios móviles coloreados (24h, 168h, 720h) ---
+
+# 1) Crea la serie imputada y los MAs
+df_impu <- df_full %>% mutate(val_impu = forecast::na.interp(.data[[y_col]]))
+
+df_ma <- df_impu %>%
+  transmute(
+    time   = .data[[time_col]],
+    y      = as.numeric(val_impu),
+    `MA 24h`  = zoo::rollmean(val_impu,  k = 24,  align = "right", fill = NA),
+    `MA 168h` = zoo::rollmean(val_impu,  k = 168, align = "right", fill = NA),
+    `MA 720h` = zoo::rollmean(val_impu,  k = 720, align = "right", fill = NA)
+  )
+
+# 2) Pasar los MAs a formato largo para mapear color por serie
+library(tidyr)
+df_ma_long <- df_ma %>%
+  tidyr::pivot_longer(cols = c(`MA 24h`,`MA 168h`,`MA 720h`),
+                      names_to = "Serie", values_to = "Valor")
+
+# 3) Graficar: original en gris, MAs en colores
+ggplot(df_ma, aes(x = time)) +
+  # Serie original
+  geom_line(aes(y = y), color = "grey80", linewidth = 0.2, alpha = 0.6) +
+  # Promedio móvil corto (24h) — se dibuja primero
+  geom_line(aes(y = `MA 24h`), color = "#1f77b4", linewidth = 0.6, alpha = 0.8) +
+  # Promedio móvil intermedio (168h) — encima de la azul
+  geom_line(aes(y = `MA 168h`), color = "#2ca02c", linewidth = 0.9, alpha = 0.9) +
+  # Promedio móvil largo (720h) — encima de las anteriores
+  geom_line(aes(y = `MA 720h`), color = "#d62728", linewidth = 1.1, alpha = 1) +
+  labs(
+    title = "Promedios móviles (24h, 168h, 720h)",
+    subtitle = "Curvas suavizadas de corto, mediano y largo plazo",
+    x = "Tiempo", y = "Potencia"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(plot.title = element_text(face = "bold"))
+
+```
+
+* La línea **gris** (serie original) muestra picos horarios abruptos.
+* La línea **azul** (media móvil 24h) suaviza el ruido diario.
+* La línea **verde** (media móvil 168h) identifica la tendencia semanal.
+* La línea **roja** (media móvil 720h) resume la tendencia mensual.
+
+**No se observan rupturas ni tendencias marcadas. Las tres medias convergen en un rango estable.**
+
+## Rezagos (lags) y autocorrelación
+
+```{r warning=FALSE}
+# --- Rezagos a nivel horario (1, 24, 168, 720) ---
+df_lags <- df_impu %>%
+  transmute(
+    time = .data[[time_col]],
+    y = as.numeric(val_impu),
+    lag_1   = dplyr::lag(as.numeric(val_impu), 1),
+    lag_24  = dplyr::lag(as.numeric(val_impu), 24),
+    lag_168 = dplyr::lag(as.numeric(val_impu), 168),
+    lag_720 = dplyr::lag(as.numeric(val_impu), 720)
+  )
+
+# Correlaciones
+cors <- c(
+  cor(df_lags$y, df_lags$lag_1,   use = "complete.obs"),
+  cor(df_lags$y, df_lags$lag_24,  use = "complete.obs"),
+  cor(df_lags$y, df_lags$lag_168, use = "complete.obs"),
+  cor(df_lags$y, df_lags$lag_720, use = "complete.obs")
+)
+setNames(round(cors, 3), c("lag1","lag24","lag168","lag720"))
+```
+* Lag 1: **0.977** → fuerte dependencia entre horas consecutivas.
+* Lag 24: **0.802** → patrón diario repetitivo.
+* Lag 168: **0.766** → correlación semanal clara.
+* Lag 720: **0.749** → correlación mensual aún significativa.
+
+**Los altos valores confirman una autocorrelación fuerte y múltiple (hora, día, semana, mes). Esto valida la presencia de estacionalidad múltiple y un comportamiento cíclico persistente.**
+
+```{r warning=FALSE}
+#ACF y PACF: Análisis de Autocorrelación 
+
+library(ggplot2)
+
+# 1) Serie imputada -> vector numérico sin NA
+serie_vec <- as.numeric(df_impu$val_impu)
+serie_vec <- serie_vec[!is.na(serie_vec)]
+
+# 2) Definir lag máximo (p.ej. 30 días = 24*30)
+max_lag <- 24 * 30
+
+# 3) Calcular ACF y PACF sin graficar
+acf_obj  <- acf(serie_vec, lag.max = max_lag, plot = FALSE)
+pacf_obj <- pacf(serie_vec, lag.max = max_lag, plot = FALSE)
+
+# 4) Pasar a data frame (ojo: ambos traen valores en $acf)
+acf_df <- data.frame(
+  lag = as.numeric(acf_obj$lag),
+  acf = as.numeric(acf_obj$acf)
 )
 
-ggplot(aux, aes(dow, y)) +
-geom_boxplot() +
-labs(title = "Distribución por día de semana", x = "Día de semana", y = y_col) +
-theme_minimal()
+pacf_df <- data.frame(
+  lag  = as.numeric(pacf_obj$lag),   # lags desde 1 normalmente
+  pacf = as.numeric(pacf_obj$acf)    # valores de PACF están en $acf
+)
 
-if (dplyr::n_distinct(aux$hod) > 1) {
-ggplot(aux, aes(hod, y)) +
-stat_summary(fun = mean, geom = "line") +
-labs(title = "Promedio por hora del día", x = "Hora", y = y_col) +
-theme_minimal()
-}
-}
+# 5) Bandas de confianza 95%
+n_eff <- length(serie_vec)
+ci <- 1.96 / sqrt(n_eff)
 
-```
-9) Resumen y próximos pasos
-```{r}
-cat("**Frecuencia (ts):**", frequency(ts_y), " | **Etiqueta:**", ts_label, "\n\n")
-cat("- Se graficó la serie y su **promedio móvil** (k =", k, ").\n")
-cat("- Se exploraron **rezagos** (lag-1 y lag-", lk, ") y **ACF/PACF**.\n", sep = "")
-if (frequency(ts_y) > 1) {
-cat("- **Estacionalidad**: STL + seasonplot/subseries.\n")
-} else {
-cat("- Sin frecuencia estacional; se mostraron patrones por calendario (lubridate).\n")
-}
-cat("\n**Siguiente paso:** resamplear a granularidad fija, preparar *train/test* y validación temporal con orígenes rodantes.\n")
-
+# 6) Graficar con ggplot2
+# --- ACF ---
+ggplot(acf_df, aes(x = lag, y = acf)) +
+  geom_col(width = 0.9) +
+  geom_hline(yintercept = 0, linewidth = 0.3) +
+  geom_hline(yintercept = c(-ci, ci), linetype = "dashed", color = "red") +
+  labs(title = "ACF - Autocorrelación de la serie horaria",
+       subtitle = paste("Límites 95% ±", round(ci, 3)),
+       x = "Rezago (horas)", y = "ACF") +
+  theme_minimal(base_size = 12)
 ```
 
+El gráfico **ACF** muestra la correlación de la serie de potencia horaria consigo misma a diferentes rezagos (lags), medidos en horas.
 
+* En el rezago 0 la autocorrelación es 1, cada punto está completamente correlacionado consigo mismo.
+* Se observa una autocorrelación muy alta y sostenida en casi todos los rezagos, con valores cercanos a 0.75–0.80 hasta aproximadamente 700 horas (~30 días).
+* Esta persistencia indica que la serie mantiene una dependencia temporal fuerte, es decir, los valores pasados tienen gran influencia sobre los futuros.
+* Se aprecian picos regulares (aprox. cada 24, 168 y 720 rezagos), lo que evidencia patrones estacionales diarios, semanales y mensuales.
+* Las bandas rojas horizontales representan los límites de significancia al 95% (±0.006). Todos los valores de la ACF están muy por encima de esas bandas, lo que confirma que la autocorrelación es estadísticamente significativa en todos los horizontes analizados.
+
+**La serie presenta una estructura fuertemente autocorrelacionada, con periodicidad marcada y ciclos regulares. Esto indica que no es una serie puramente aleatoria, sino que está dominada por una estacionalidad sistemática de carácter diario y semanal.**
+
+```{r warning=FALSE}
+# --- PACF ---
+ggplot(pacf_df, aes(x = lag, y = pacf)) +
+  geom_col(width = 0.9) +
+  geom_hline(yintercept = 0, linewidth = 0.3) +
+  geom_hline(yintercept = c(-ci, ci), linetype = "dashed", color = "red") +
+  labs(title = "PACF - Autocorrelación parcial",
+       subtitle = paste("Límites 95% ±", round(ci, 3)),
+       x = "Rezago (horas)", y = "PACF") +
+  theme_minimal(base_size = 12)
+
+```
+
+El gráfico **PACF** muestra la correlación entre la serie y sus rezagos una vez eliminada la influencia de los rezagos intermedios. 
+
+* Se observa un pico alto en el primer rezago (lag = 1), lo que indica una fuerte dependencia inmediata (efecto de la hora anterior).
+* Después del primer rezago, los valores de la PACF caen rápidamente y se mantienen cerca de cero, salvo algunos picos débiles en rezagos aproximadamente iguales a 24, 168 y 720 horas, que corresponden a efectos estacionales.
+* Estos picos secundarios son pequeños pero significativos, lo que sugiere una estacionalidad múltiple (día, semana, mes).
+
+**La PACF confirma que el comportamiento actual de la potencia depende principalmente de su valor en la hora anterior (AR(1)), junto con componentes estacionales de largo plazo.**
+
+## Estacionalidad (gráficos y descomposición)
+
+Para descomponer, usamos un objeto `ts` **regular** con frecuencia **diaria** (`24`), **semanal** (`24*7`) o **anual** (`24*365`). Utilizamos la serie imputada `val_impu` para evitar huecos.
+
+```{r warning=FALSE}
+# Construir ts con frecuencia diaria (24 por ciclo)
+start_time <- min(df_impu[[time_col]], na.rm = TRUE)
+Indice.ts.diaria <- ts(df_impu$val_impu,
+                       start = c(year(start_time), hour(start_time) + 1),
+                       frequency = 24)
+
+# Gráficos estacionales (por hora del día y por mes)
+autoplot(Indice.ts.diaria) + ggtitle("Serie ts (freq=24)")
+
+```
+**Serie ts (freq = 24)**
+La serie presenta alta variabilidad (cada día cambia mucho), con rupturas o cambios estructurales en determinados años. Esto indica que el sistema de potencia tiene patrones por periodos largos más que una estacionalidad estricta diaria.
+
+```{r warning=FALSE}
+# STL y gráficos estacionales
+fit_stl <- stl(Indice.ts.diaria, s.window = "periodic")
+plot(fit_stl, main = "Descomposición STL (frecuencia diaria)")
+
+```
+**Decomposición STL frecuencia diaria**
+* data: Muestra la potencia total observada con todas sus fluctuaciones.
+* seasonal: Se observa una banda negra uniforme, porque la variabilidad de la serie es mucho mayor que la amplitud de la estacionalidad.
+* trend: Se observan periodos con incrementos o descensos sostenidos de potencia
+* remainder: Presenta la variabilidad de corto plazo, los picos, fallos de medición y valores atípicos
+
+```{r warning=FALSE}
+# Define un inicio dinámico (o fija una fecha)
+ini_zoom <- as.POSIXct("2021-02-01", tz = TZ)  
+fin_zoom <- ini_zoom + lubridate::weeks(4) 
+
+slice <- df_impu %>%
+  dplyr::filter(.data[[time_col]] >= ini_zoom, .data[[time_col]] < fin_zoom)
+
+ts24_zoom <- ts(as.numeric(slice$val_impu), frequency = 24)
+
+fit_zoom <- stl(ts24_zoom, s.window = "periodic", robust = TRUE)
+plot(fit_zoom, range.bars = FALSE, main = "STL en ventana (4 semanas)")
+
+```
+**Decomposición STL en una ventana de 4 semanas**
+
+* **data**: 
+  * Se observan oscilaciones regulares de subida y bajada cada 24 horas, lo cual refleja el patrón de potencia diario.
+  * Hay algunos huecos o caídas abruptas que corresponden a datos faltantes o interrupciones de registro de los datos.
+  * La serie se mueve alrededor de una media aproximada de 5000–6000 KW, con variaciones diarias de alrededor de ±1000 – 1500 KW.
+  
+* **seasonal**: 
+  * Se observa una forma de onda repetitiva tipo sinusoinal, con un ciclo por día.
+  * La serie tiene una estacionalidad clara diaria: la potencia sube en ciertas horas (probablemente durante el día laboral) y baja en otras (probablemente por la noche).
+  * La amplitud del patrón se mantiene bastante constante, lo que sugiere que la estacionalidad diaria no cambia mucho entre semanas.
+  
+* **trend**: 
+  * Se observan ondas de mayor periodo que podrían corresponder a variaciones semanales.
+  * La tendencia muestra subidas y bajadas lentas, lo que indica variabilidad estructural o cambios progresivos en el nivel medio de potencia.
+  * La escala vertical está alrededor de los 5000–7000 KW.
+
+* **remainder**:
+  * Los picos hacia arriba o abajo representan anomalías, errores o eventos inusuales.
+  * Se observan algunos picos negativos fuertes, que podrían deberse a interrupciones o registros incorrectos de potencia (NA o 0).
+  * El resto del residuo oscila cerca de cero, lo cual es deseable (significa que la mayor parte de la variabilidad fue capturada por tendencia + estacionalidad).
+
+**En resumen, la serie de potencia tiene una estacionalidad diaria fuerte, una tendencia suave semanal, y ruido moderado.**
+
+## Indicadores resumidos
+
+```{r warning=FALSE}
+# Completitud global
+comp_global <- 1 - mean(is.na(df_full[[y_col]]))
+
+# Completitud por año
+comp_anio <- df_full %>%
+  dplyr::group_by(anio = lubridate::year(.data[[time_col]])) %>%
+  dplyr::summarise(
+    comp = 1 - mean(is.na(.data[[y_col]])),
+    n_obs = dplyr::n(),
+    .groups = "drop"
+  )
+
+comp_global
+comp_anio
+
+```
+
+| **Año**       | **Completitud** | **Observaciones**           |
+| ---------- | ------------ | ----------------------- |
+| 2018      | 99.6%       | Muy buena cobertura     |
+| 2019      | 97.9%       | Ligera pérdida de datos |
+| 2020      | 99.7%       | Excelente               |
+| 2021      | 99.4%       | Alta                    |
+| 2022–2025 | 100%        | Sin huecos              |
+
+
+## Conclusiones
+
+* La serie de potencia es altamente estacionaria y cíclica.
+* Existen ciclos claros de 24 y 168 horas, reflejando comportamientos diarios y semanales.
+* No se detectan tendencias de crecimiento, lo que indica estabilidad en la operación.
+* Los promedios móviles confirman consistencia estructural.
+* La descomposición STL y la ACF refuerzan la idea de una estacionalidad regular y predecible.
+* La calidad del registro (99.5%) garantiza confiabilidad para análisis predictivos.

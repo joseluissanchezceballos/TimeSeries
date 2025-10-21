@@ -5,4 +5,15 @@ por-qué-es-importante
 fuente-de-datos-y-permisos
 impacto-esperado
 referencias
-Estructura
+análisis-de-serie-de-tiempo-potencia-eléctrica-horaria
+contexto-y-objetivos
+cargue-de-librerías
+lectura-y-preparación-de-los-datos
+funciones-auxiliares-de-visualización-de-la-serie-de-tiempo
+vista-general-del-comportamiento-de-la-potencia-eléctrica-por-escalas-diaria-semanal-mensual-anual
+curvas-de-potencia-eléctrica-por-periodo-día-semana-mes-año
+promedios-móviles
+rezagos-lags-y-autocorrelación
+estacionalidad-gráficos-y-descomposición
+indicadores-resumidos
+conclusiones
