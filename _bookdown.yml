@@ -5,5 +5,7 @@ rmd_files:
   - "index.Rmd"
   - "01-propuesta.Rmd"
   - "02-Estructura.Rmd"
+  - "03-Preprocesamiento_y_visualizacion.Rmd"
+  
   
 
