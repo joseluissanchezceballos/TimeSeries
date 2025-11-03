@@ -5,7 +5,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.width =
 TZ <- "America/Bogota"
 ```
 
-```{r flags, include=FALSE}
+```{r flags0, include=FALSE}
 csv_dir   <<-  "C:/Users/Lenovo/PUJ Cali/OSCAR VELASQUEZ CHALA - Proyecto Aplicado - Proy. Demanda Electrica/2. Fuentes de Datos"
 csv_name  <<- "015 SOLO POTENCIA PARA SUBI A BOOKDOWN.csv"
 horizon_days  <<- 7      # pronóstico X días
@@ -35,7 +35,7 @@ library(changepoint)
 
 ```
 
-```{r timing-tools, message=FALSE, warning=FALSE, include=FALSE}
+```{r timing-tools0, message=FALSE, warning=FALSE, include=FALSE}
 ##################################
 #Herramientas para medir tiempos
 ##################################
