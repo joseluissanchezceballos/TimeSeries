@@ -30,7 +30,7 @@
   
   
 <link rel="prev" href="Preprocesamiento.html"/>
-
+<link rel="next" href="Modelos_estacionarios_1.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -228,6 +228,25 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="5.13" data-path="Modelización.html"><a href="Modelización.html#resumen-final-de-m%C3%A9tricas-rmse-mape"><i class="fa fa-check"></i><b>5.13</b> Resumen final de métricas (RMSE / MAPE)</a></li>
 <li class="chapter" data-level="5.14" data-path="Modelización.html"><a href="Modelización.html#gr%C3%A1ficas-de-predicci%C3%B3n-por-modelo"><i class="fa fa-check"></i><b>5.14</b> Gráficas de predicción por modelo</a></li>
 <li class="chapter" data-level="5.15" data-path="Modelización.html"><a href="Modelización.html#resumen-de-tiempos-de-ejecuci%C3%B3n-del-c%C3%B3digo-1"><i class="fa fa-check"></i><b>5.15</b> Resumen de tiempos de ejecución del código</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html"><i class="fa fa-check"></i><b>6</b> Modelos estacionarios - Metodología Box-Jenkins</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#introducci%C3%B3n"><i class="fa fa-check"></i><b>6.1</b> Introducción</a></li>
+<li class="chapter" data-level="6.2" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#carga-de-datos"><i class="fa fa-check"></i><b>6.2</b> Carga de datos</a></li>
+<li class="chapter" data-level="6.3" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#limpieza-e-imputaci%C3%B3n-de-faltantes"><i class="fa fa-check"></i><b>6.3</b> Limpieza e imputación de faltantes</a></li>
+<li class="chapter" data-level="6.4" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#creaci%C3%B3n-de-la-serie-de-tiempo"><i class="fa fa-check"></i><b>6.4</b> Creación de la serie de tiempo</a></li>
+<li class="chapter" data-level="6.5" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#exploraci%C3%B3n-inicial"><i class="fa fa-check"></i><b>6.5</b> Exploración inicial</a></li>
+<li class="chapter" data-level="6.6" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#estacionariedad-adf-y-acfpacf"><i class="fa fa-check"></i><b>6.6</b> Estacionariedad (ADF) y ACF/PACF</a></li>
+<li class="chapter" data-level="6.7" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#modelo-arima-boxjenkins"><i class="fa fa-check"></i><b>6.7</b> Modelo ARIMA (Box–Jenkins)</a></li>
+<li class="chapter" data-level="6.8" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#comparaci%C3%B3n-de-modelos-aicbic"><i class="fa fa-check"></i><b>6.8</b> Comparación de modelos (AIC/BIC)</a></li>
+<li class="chapter" data-level="6.9" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#diagn%C3%B3stico"><i class="fa fa-check"></i><b>6.9</b> Diagnóstico</a></li>
+<li class="chapter" data-level="6.10" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#pron%C3%B3stico"><i class="fa fa-check"></i><b>6.10</b> Pronóstico</a>
+<ul>
+<li class="chapter" data-level="6.10.1" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#zoom-%C3%BAltimos-7-d%C3%ADas-pron%C3%B3stico"><i class="fa fa-check"></i><b>6.10.1</b> Zoom: últimos 7 días + pronóstico</a></li>
+<li class="chapter" data-level="6.10.2" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#zoom-%C3%BAltimos-21-d%C3%ADas-7-d%C3%ADas-de-pron%C3%B3stico"><i class="fa fa-check"></i><b>6.10.2</b> Zoom: últimos 21 días + 7 días de pronóstico</a></li>
+<li class="chapter" data-level="6.10.3" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#zoom-%C3%BAltimos-6-meses-3-meses-de-pron%C3%B3stico"><i class="fa fa-check"></i><b>6.10.3</b> Zoom: últimos 6 meses + 3 meses de pronóstico</a></li>
+</ul></li>
+<li class="chapter" data-level="6.11" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#conclusiones-2"><i class="fa fa-check"></i><b>6.11</b> Conclusiones</a></li>
 </ul></li>
 </ul>
 
@@ -2365,28 +2384,28 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <tbody>
 <tr class="odd">
 <td align="left">Imputación (na.interp)</td>
-<td align="right">0.023</td>
+<td align="right">0.020</td>
 <td align="left">s</td>
 <td align="left">OK</td>
 <td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left">ACF/PACF (original)</td>
-<td align="right">0.143</td>
+<td align="right">0.111</td>
 <td align="left">s</td>
 <td align="left">OK</td>
 <td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left">ACF/PACF (diferenciada)</td>
-<td align="right">0.131</td>
+<td align="right">0.105</td>
 <td align="left">s</td>
 <td align="left">OK</td>
 <td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left">Ajuste SARIMA + Pronóstico</td>
-<td align="right">297.090</td>
+<td align="right">253.181</td>
 <td align="left">s</td>
 <td align="left">OK</td>
 <td align="left"></td>
@@ -2400,42 +2419,42 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </tr>
 <tr class="even">
 <td align="left">Ajuste SARIMA TS log-transformada</td>
-<td align="right">566.191</td>
+<td align="right">442.243</td>
 <td align="left">s</td>
 <td align="left">OK</td>
 <td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left">HW - Preprocesamiento</td>
-<td align="right">16.390</td>
+<td align="right">13.801</td>
 <td align="left">s</td>
 <td align="left">OK</td>
 <td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left">HW - Split TRAIN/TEST</td>
-<td align="right">1.106</td>
+<td align="right">0.967</td>
 <td align="left">s</td>
 <td align="left">OK</td>
 <td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left">HW - Aditivo y multiplicativo</td>
-<td align="right">52.772</td>
+<td align="right">47.004</td>
 <td align="left">s</td>
 <td align="left">OK</td>
 <td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left">HW - ARIMA simple</td>
-<td align="right">391.953</td>
+<td align="right">332.070</td>
 <td align="left">s</td>
 <td align="left">OK</td>
 <td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left">HW - Box-CoX</td>
-<td align="right">28.914</td>
+<td align="right">22.967</td>
 <td align="left">s</td>
 <td align="left">OK</td>
 <td align="left"></td>
@@ -2450,8 +2469,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           </div>
         </div>
       </div>
-<a href="Preprocesamiento.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-
+<a href="Preprocesamiento.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="Modelos_estacionarios_1.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

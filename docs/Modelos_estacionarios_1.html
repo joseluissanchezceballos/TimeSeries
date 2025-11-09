@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>6 Modelos estacionarios - Metodología Box-Jenkins | Propuesta de serie de tiempo: Predicción de demanda eléctrica a corto plazo</title>
+  <meta name="description" content="6 Modelos estacionarios - Metodología Box-Jenkins | Propuesta de serie de tiempo: Predicción de demanda eléctrica a corto plazo" />
+  <meta name="generator" content="bookdown 0.45 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="6 Modelos estacionarios - Metodología Box-Jenkins | Propuesta de serie de tiempo: Predicción de demanda eléctrica a corto plazo" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="6 Modelos estacionarios - Metodología Box-Jenkins | Propuesta de serie de tiempo: Predicción de demanda eléctrica a corto plazo" />
+  
+  
+  
+
+<meta name="author" content="Fredy A. Ordoñez · Oscar F. Velásquez · José L. Sánchez" />
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="Modelización.html"/>
+
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+<style type="text/css">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Presentación del Bookdown</a></li>
+<li class="chapter" data-level="2" data-path="propuesta.html"><a href="propuesta.html"><i class="fa fa-check"></i><b>2</b> Propuesta de serie de tiempo: Predicción de demanda eléctrica a corto plazo</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="propuesta.html"><a href="propuesta.html#qu%C3%A9-voy-a-pronosticar"><i class="fa fa-check"></i><b>2.1</b> ¿Qué voy a pronosticar?</a></li>
+<li class="chapter" data-level="2.2" data-path="propuesta.html"><a href="propuesta.html#por-qu%C3%A9-es-importante"><i class="fa fa-check"></i><b>2.2</b> ¿Por qué es importante?</a></li>
+<li class="chapter" data-level="2.3" data-path="propuesta.html"><a href="propuesta.html#fuente-de-datos-y-permisos"><i class="fa fa-check"></i><b>2.3</b> Fuente de datos y permisos</a></li>
+<li class="chapter" data-level="2.4" data-path="propuesta.html"><a href="propuesta.html#impacto-esperado"><i class="fa fa-check"></i><b>2.4</b> Impacto esperado</a></li>
+<li class="chapter" data-level="2.5" data-path="propuesta.html"><a href="propuesta.html#referencias"><i class="fa fa-check"></i><b>2.5</b> Referencias</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><i class="fa fa-check"></i><b>3</b> Análisis de Serie de Tiempo: Potencia Eléctrica Horaria</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#contexto-y-objetivos"><i class="fa fa-check"></i><b>3.1</b> Contexto y objetivos</a></li>
+<li class="chapter" data-level="3.2" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#cargue-de-librer%C3%ADas"><i class="fa fa-check"></i><b>3.2</b> Cargue de Librerías</a></li>
+<li class="chapter" data-level="3.3" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#lectura-y-preparaci%C3%B3n-de-los-datos"><i class="fa fa-check"></i><b>3.3</b> Lectura y preparación de los datos</a></li>
+<li class="chapter" data-level="3.4" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#funciones-auxiliares-de-visualizaci%C3%B3n-de-la-serie-de-tiempo"><i class="fa fa-check"></i><b>3.4</b> Funciones auxiliares de visualización de la serie de tiempo</a></li>
+<li class="chapter" data-level="3.5" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#vista-general-del-comportamiento-de-la-potencia-el%C3%A9ctrica-por-escalas-diaria-semanal-mensual-anual"><i class="fa fa-check"></i><b>3.5</b> Vista general del comportamiento de la potencia eléctrica por escalas (diaria, semanal, mensual, anual)</a></li>
+<li class="chapter" data-level="3.6" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#curvas-de-potencia-el%C3%A9ctrica-por-periodo-d%C3%ADa-semana-mes-a%C3%B1o"><i class="fa fa-check"></i><b>3.6</b> Curvas de potencia eléctrica por periodo (día, semana, mes, año)</a></li>
+<li class="chapter" data-level="3.7" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#promedios-m%C3%B3viles"><i class="fa fa-check"></i><b>3.7</b> Promedios móviles</a></li>
+<li class="chapter" data-level="3.8" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#rezagos-lags-y-autocorrelaci%C3%B3n"><i class="fa fa-check"></i><b>3.8</b> Rezagos (lags) y autocorrelación</a></li>
+<li class="chapter" data-level="3.9" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#estacionalidad-gr%C3%A1ficos-y-descomposici%C3%B3n"><i class="fa fa-check"></i><b>3.9</b> Estacionalidad (gráficos y descomposición)</a></li>
+<li class="chapter" data-level="3.10" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#indicadores-resumidos"><i class="fa fa-check"></i><b>3.10</b> Indicadores resumidos</a></li>
+<li class="chapter" data-level="3.11" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#conclusiones"><i class="fa fa-check"></i><b>3.11</b> Conclusiones</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html"><i class="fa fa-check"></i><b>4</b> Preprocesamiento y visualización - Estacionariedad, ACF/PACF, STL, ARIMA, Puntos de cambio y Pronóstico</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#resumen"><i class="fa fa-check"></i><b>4.1</b> Resumen</a></li>
+<li class="chapter" data-level="4.2" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#carga-de-librer%C3%ADas"><i class="fa fa-check"></i><b>4.2</b> Carga de librerías</a></li>
+<li class="chapter" data-level="4.3" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#carga-de-datos-y-visualizaci%C3%B3n"><i class="fa fa-check"></i><b>4.3</b> Carga de datos y visualización</a>
+<ul>
+<li class="chapter" data-level="4.3.1" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#bandas-para-huecos-na-y-vistas-multiescala"><i class="fa fa-check"></i><b>4.3.1</b> Bandas para huecos (NA) y vistas multiescala</a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#estacionariedad-prueba-adf-augmented-dickey-fuller-test-y-diferenciaci%C3%B3n"><i class="fa fa-check"></i><b>4.4</b> Estacionariedad: prueba ADF (Augmented Dickey-Fuller Test) y diferenciación</a></li>
+<li class="chapter" data-level="4.5" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#acf-y-pacf-original-y-diferenciada"><i class="fa fa-check"></i><b>4.5</b> ACF y PACF (original y diferenciada)</a></li>
+<li class="chapter" data-level="4.6" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#descomposici%C3%B3n-stl-seasonal-trend-decomposition-using-loess-y-mstl-multiple-seasonal-trend-decomposition-using-loess"><i class="fa fa-check"></i><b>4.6</b> Descomposición STL (Seasonal-Trend decomposition using Loess) y MSTL (Multiple Seasonal-Trend decomposition using Loess)</a>
+<ul>
+<li class="chapter" data-level="4.6.1" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#descomposici%C3%B3n-de-la-serie-por-estacionalidades"><i class="fa fa-check"></i><b>4.6.1</b> Descomposición de la serie por estacionalidades</a></li>
+<li class="chapter" data-level="4.6.2" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#descomposici%C3%B3n-de-la-serie-en-una-ventana-de-4-semanas"><i class="fa fa-check"></i><b>4.6.2</b> Descomposición de la serie en una ventana de 4 semanas</a></li>
+</ul></li>
+<li class="chapter" data-level="4.7" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#selecci%C3%B3n-del-modelo-eficiente-auto.arima-y-pron%C3%B3stico"><i class="fa fa-check"></i><b>4.7</b> Selección del modelo eficiente (auto.arima) y Pronóstico</a>
+<ul>
+<li class="chapter" data-level="4.7.1" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#zoom-al-pron%C3%B3stico"><i class="fa fa-check"></i><b>4.7.1</b> Zoom al Pronóstico</a></li>
+</ul></li>
+<li class="chapter" data-level="4.8" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#puntos-de-cambio-y-visualizaci%C3%B3n"><i class="fa fa-check"></i><b>4.8</b> Puntos de cambio y visualización</a></li>
+<li class="chapter" data-level="4.9" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#outliers-y-verificaci%C3%B3n-de-supuestos-del-arima"><i class="fa fa-check"></i><b>4.9</b> Outliers y verificación de supuestos del ARIMA</a>
+<ul>
+<li class="chapter" data-level="4.9.1" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#qq-plot-de-los-residuos-del-modelo-arima"><i class="fa fa-check"></i><b>4.9.1</b> Q–Q Plot de los residuos del modelo ARIMA</a></li>
+</ul></li>
+<li class="chapter" data-level="4.10" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#transformaci%C3%B3n-logar%C3%ADtmica-para-estabilizar-la-varianza"><i class="fa fa-check"></i><b>4.10</b> Transformación logarítmica para estabilizar la varianza</a></li>
+<li class="chapter" data-level="4.11" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#ajuste-del-modelo-arima-en-escala-logar%C3%ADtmica"><i class="fa fa-check"></i><b>4.11</b> Ajuste del modelo ARIMA en escala logarítmica</a></li>
+<li class="chapter" data-level="4.12" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#verificaci%C3%B3n-de-supuestos-del-nuevo-modelo"><i class="fa fa-check"></i><b>4.12</b> Verificación de supuestos del nuevo modelo</a></li>
+<li class="chapter" data-level="4.13" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#pron%C3%B3stico-con-el-modelo-mejorado-escala-logar%C3%ADtmica"><i class="fa fa-check"></i><b>4.13</b> Pronóstico con el modelo mejorado (escala logarítmica)</a>
+<ul>
+<li class="chapter" data-level="4.13.1" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#reconversi%C3%B3n-a-escala-original-exponencial-inversa"><i class="fa fa-check"></i><b>4.13.1</b> Reconversión a escala original (exponencial inversa)</a></li>
+</ul></li>
+<li class="chapter" data-level="4.14" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#conclusiones-1"><i class="fa fa-check"></i><b>4.14</b> Conclusiones</a>
+<ul>
+<li class="chapter" data-level="4.14.1" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#resumen-de-tiempos-de-ejecuci%C3%B3n-del-c%C3%B3digo"><i class="fa fa-check"></i><b>4.14.1</b> Resumen de tiempos de ejecución del código</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="Modelización.html"><a href="Modelización.html"><i class="fa fa-check"></i><b>5</b> Modelos de pronóstico - Metodología Holt – Winter</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="Modelización.html"><a href="Modelización.html#resumen-1"><i class="fa fa-check"></i><b>5.1</b> Resumen</a></li>
+<li class="chapter" data-level="5.2" data-path="Modelización.html"><a href="Modelización.html#cambio-de-la-serie-de-tiempo-a-circuito-de-potencia---preprocesamiento-y-visualizaci%C3%B3n"><i class="fa fa-check"></i><b>5.2</b> Cambio de la serie de tiempo a circuito de potencia - Preprocesamiento y visualización</a>
+<ul>
+<li class="chapter" data-level="5.2.1" data-path="Modelización.html"><a href="Modelización.html#carga-de-librer%C3%ADas-1"><i class="fa fa-check"></i><b>5.2.1</b> Carga de librerías</a></li>
+<li class="chapter" data-level="5.2.2" data-path="Modelización.html"><a href="Modelización.html#carga-de-datos-y-visualizaci%C3%B3n-1"><i class="fa fa-check"></i><b>5.2.2</b> Carga de datos y visualización</a></li>
+<li class="chapter" data-level="5.2.3" data-path="Modelización.html"><a href="Modelización.html#estacionariedad-prueba-adf-augmented-dickey-fuller-test-y-diferenciaci%C3%B3n-1"><i class="fa fa-check"></i><b>5.2.3</b> Estacionariedad: prueba ADF (Augmented Dickey-Fuller Test) y diferenciación</a></li>
+<li class="chapter" data-level="5.2.4" data-path="Modelización.html"><a href="Modelización.html#acf-y-pacf-original-y-diferenciada-1"><i class="fa fa-check"></i><b>5.2.4</b> ACF y PACF (original y diferenciada)</a></li>
+<li class="chapter" data-level="5.2.5" data-path="Modelización.html"><a href="Modelización.html#descomposici%C3%B3n-stl-seasonal-trend-decomposition-using-loess-y-mstl-multiple-seasonal-trend-decomposition-using-loess-1"><i class="fa fa-check"></i><b>5.2.5</b> Descomposición STL (Seasonal-Trend decomposition using Loess) y MSTL (Multiple Seasonal-Trend decomposition using Loess)</a></li>
+<li class="chapter" data-level="5.2.6" data-path="Modelización.html"><a href="Modelización.html#promedios-m%C3%B3viles-24h-168h-720h"><i class="fa fa-check"></i><b>5.2.6</b> Promedios móviles (24h, 168h, 720h)</a></li>
+<li class="chapter" data-level="5.2.7" data-path="Modelización.html"><a href="Modelización.html#selecci%C3%B3n-del-modelo-eficiente-auto.arima-y-pron%C3%B3stico-1"><i class="fa fa-check"></i><b>5.2.7</b> Selección del modelo eficiente (auto.arima) y Pronóstico</a></li>
+<li class="chapter" data-level="5.2.8" data-path="Modelización.html"><a href="Modelización.html#puntos-de-cambio-y-visualizaci%C3%B3n-1"><i class="fa fa-check"></i><b>5.2.8</b> Puntos de cambio y visualización</a></li>
+<li class="chapter" data-level="5.2.9" data-path="Modelización.html"><a href="Modelización.html#outliers-y-verificaci%C3%B3n-de-supuestos-del-arima-1"><i class="fa fa-check"></i><b>5.2.9</b> Outliers y verificación de supuestos del ARIMA</a></li>
+<li class="chapter" data-level="5.2.10" data-path="Modelización.html"><a href="Modelización.html#transformaci%C3%B3n-logar%C3%ADtmica-para-estabilizar-la-varianza-1"><i class="fa fa-check"></i><b>5.2.10</b> Transformación logarítmica para estabilizar la varianza</a></li>
+<li class="chapter" data-level="5.2.11" data-path="Modelización.html"><a href="Modelización.html#ajuste-del-modelo-arima-en-escala-logar%C3%ADtmica-1"><i class="fa fa-check"></i><b>5.2.11</b> Ajuste del modelo ARIMA en escala logarítmica</a></li>
+<li class="chapter" data-level="5.2.12" data-path="Modelización.html"><a href="Modelización.html#verificaci%C3%B3n-de-supuestos-del-nuevo-modelo-arima-en-escala-logar%C3%ADtmica"><i class="fa fa-check"></i><b>5.2.12</b> Verificación de supuestos del nuevo modelo ARIMA en escala logarítmica</a></li>
+<li class="chapter" data-level="5.2.13" data-path="Modelización.html"><a href="Modelización.html#pron%C3%B3stico-con-el-modelo-mejorado-escala-logar%C3%ADtmica-1"><i class="fa fa-check"></i><b>5.2.13</b> Pronóstico con el modelo mejorado (escala logarítmica)</a></li>
+</ul></li>
+<li class="chapter" data-level="5.3" data-path="Modelización.html"><a href="Modelización.html#preprocesamiento-de-la-serie-de-datos-para-holtwinters"><i class="fa fa-check"></i><b>5.3</b> Preprocesamiento de la serie de datos para Holt–Winters</a></li>
+<li class="chapter" data-level="5.4" data-path="Modelización.html"><a href="Modelización.html#divisi%C3%B3n-de-los-datos-entre-traintest"><i class="fa fa-check"></i><b>5.4</b> División de los datos entre TRAIN/TEST</a></li>
+<li class="chapter" data-level="5.5" data-path="Modelización.html"><a href="Modelización.html#ajuste-holtwinters-aditivo-y-multiplicativo-usando-train-y-h-definidos"><i class="fa fa-check"></i><b>5.5</b> Ajuste Holt–Winters aditivo y multiplicativo (usando TRAIN y h definidos)</a></li>
+<li class="chapter" data-level="5.6" data-path="Modelización.html"><a href="Modelización.html#gr%C3%A1fica-comparativa-traintest-pron%C3%B3sticos-hw-aditivo-vs.-multiplicativo"><i class="fa fa-check"></i><b>5.6</b> Gráfica comparativa: TRAIN/TEST + pronósticos HW (aditivo vs. multiplicativo)</a></li>
+<li class="chapter" data-level="5.7" data-path="Modelización.html"><a href="Modelización.html#evaluaci%C3%B3n-en-test-mape-y-rmse"><i class="fa fa-check"></i><b>5.7</b> Evaluación en TEST (MAPE y RMSE)</a></li>
+<li class="chapter" data-level="5.8" data-path="Modelización.html"><a href="Modelización.html#comparaci%C3%B3n-con-un-arima-simple"><i class="fa fa-check"></i><b>5.8</b> Comparación con un ARIMA simple</a></li>
+<li class="chapter" data-level="5.9" data-path="Modelización.html"><a href="Modelización.html#holt-winter-en-boxcox-ajuste-pron%C3%B3stico-en-bc-reconversi%C3%B3n-a-escala-original"><i class="fa fa-check"></i><b>5.9</b> Holt Winter en Box–Cox (ajuste + pronóstico en BC + reconversión a escala original)</a></li>
+<li class="chapter" data-level="5.10" data-path="Modelización.html"><a href="Modelización.html#gr%C3%A1fica-comparativa-traintest-en-original-hw-boxcox-reconvertido"><i class="fa fa-check"></i><b>5.10</b> Gráfica comparativa (TRAIN/TEST en original) + HW Box–Cox reconvertido</a></li>
+<li class="chapter" data-level="5.11" data-path="Modelización.html"><a href="Modelización.html#zoom-al-pron%C3%B3stico-holt-winter-boxcox-en-original"><i class="fa fa-check"></i><b>5.11</b> Zoom al pronóstico Holt Winter Box–Cox en original</a></li>
+<li class="chapter" data-level="5.12" data-path="Modelización.html"><a href="Modelización.html#m%C3%A9tricas-en-test-comparando-en-escala-original-holt-winter-y-boxcox"><i class="fa fa-check"></i><b>5.12</b> Métricas en TEST comparando en <strong>escala original</strong> (Holt Winter y Box–Cox)</a></li>
+<li class="chapter" data-level="5.13" data-path="Modelización.html"><a href="Modelización.html#resumen-final-de-m%C3%A9tricas-rmse-mape"><i class="fa fa-check"></i><b>5.13</b> Resumen final de métricas (RMSE / MAPE)</a></li>
+<li class="chapter" data-level="5.14" data-path="Modelización.html"><a href="Modelización.html#gr%C3%A1ficas-de-predicci%C3%B3n-por-modelo"><i class="fa fa-check"></i><b>5.14</b> Gráficas de predicción por modelo</a></li>
+<li class="chapter" data-level="5.15" data-path="Modelización.html"><a href="Modelización.html#resumen-de-tiempos-de-ejecuci%C3%B3n-del-c%C3%B3digo-1"><i class="fa fa-check"></i><b>5.15</b> Resumen de tiempos de ejecución del código</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html"><i class="fa fa-check"></i><b>6</b> Modelos estacionarios - Metodología Box-Jenkins</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#introducci%C3%B3n"><i class="fa fa-check"></i><b>6.1</b> Introducción</a></li>
+<li class="chapter" data-level="6.2" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#carga-de-datos"><i class="fa fa-check"></i><b>6.2</b> Carga de datos</a></li>
+<li class="chapter" data-level="6.3" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#limpieza-e-imputaci%C3%B3n-de-faltantes"><i class="fa fa-check"></i><b>6.3</b> Limpieza e imputación de faltantes</a></li>
+<li class="chapter" data-level="6.4" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#creaci%C3%B3n-de-la-serie-de-tiempo"><i class="fa fa-check"></i><b>6.4</b> Creación de la serie de tiempo</a></li>
+<li class="chapter" data-level="6.5" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#exploraci%C3%B3n-inicial"><i class="fa fa-check"></i><b>6.5</b> Exploración inicial</a></li>
+<li class="chapter" data-level="6.6" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#estacionariedad-adf-y-acfpacf"><i class="fa fa-check"></i><b>6.6</b> Estacionariedad (ADF) y ACF/PACF</a></li>
+<li class="chapter" data-level="6.7" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#modelo-arima-boxjenkins"><i class="fa fa-check"></i><b>6.7</b> Modelo ARIMA (Box–Jenkins)</a></li>
+<li class="chapter" data-level="6.8" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#comparaci%C3%B3n-de-modelos-aicbic"><i class="fa fa-check"></i><b>6.8</b> Comparación de modelos (AIC/BIC)</a></li>
+<li class="chapter" data-level="6.9" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#diagn%C3%B3stico"><i class="fa fa-check"></i><b>6.9</b> Diagnóstico</a></li>
+<li class="chapter" data-level="6.10" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#pron%C3%B3stico"><i class="fa fa-check"></i><b>6.10</b> Pronóstico</a>
+<ul>
+<li class="chapter" data-level="6.10.1" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#zoom-%C3%BAltimos-7-d%C3%ADas-pron%C3%B3stico"><i class="fa fa-check"></i><b>6.10.1</b> Zoom: últimos 7 días + pronóstico</a></li>
+<li class="chapter" data-level="6.10.2" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#zoom-%C3%BAltimos-21-d%C3%ADas-7-d%C3%ADas-de-pron%C3%B3stico"><i class="fa fa-check"></i><b>6.10.2</b> Zoom: últimos 21 días + 7 días de pronóstico</a></li>
+<li class="chapter" data-level="6.10.3" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#zoom-%C3%BAltimos-6-meses-3-meses-de-pron%C3%B3stico"><i class="fa fa-check"></i><b>6.10.3</b> Zoom: últimos 6 meses + 3 meses de pronóstico</a></li>
+</ul></li>
+<li class="chapter" data-level="6.11" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#conclusiones-2"><i class="fa fa-check"></i><b>6.11</b> Conclusiones</a></li>
+</ul></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Propuesta de serie de tiempo: Predicción de demanda eléctrica a corto plazo</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="Modelos_estacionarios_1" class="section level1 hasAnchor" number="6">
+<h1><span class="header-section-number">6</span> Modelos estacionarios - Metodología Box-Jenkins<a href="Modelos_estacionarios_1.html#Modelos_estacionarios_1" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="introducción" class="section level2 hasAnchor" number="6.1">
+<h2><span class="header-section-number">6.1</span> Introducción<a href="Modelos_estacionarios_1.html#introducci%C3%B3n" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>En esta actividad del <strong>Módulo 2, Unidad 2</strong> aplicamos la metodología <strong>Box–Jenkins</strong> sobre una serie de tiempo <strong>horaria</strong> que contiene los datos potencia de salida de una subestación eléctrica con tres circuitos.<br />
+</p>
+<p>El archivo tiene:</p>
+<ul>
+<li><code>FECHA</code>: fecha–hora</li>
+<li><code>VALOR_IMPUTADO</code>: valor numérico (con algunos NA)</li>
+</ul>
+<p>Antes de modelar, <strong>interpolaremos</strong> los NA para poder aplicar ADF, ACF/PACF y ARIMA sin errores.</p>
+</div>
+<div id="carga-de-datos" class="section level2 hasAnchor" number="6.2">
+<h2><span class="header-section-number">6.2</span> Carga de datos<a href="Modelos_estacionarios_1.html#carga-de-datos" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div class="sourceCode" id="cb132"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb132-1"><a href="Modelos_estacionarios_1.html#cb132-1" tabindex="-1"></a><span class="co"># Ajusta esta ruta a tu PC</span></span>
+<span id="cb132-2"><a href="Modelos_estacionarios_1.html#cb132-2" tabindex="-1"></a>csv_dir  <span class="ot">&lt;-</span> <span class="st">&quot;C:/Users/Lenovo/PUJ Cali/OSCAR VELASQUEZ CHALA - Proyecto Aplicado - Proy. Demanda Electrica/2. Fuentes de Datos&quot;</span></span>
+<span id="cb132-3"><a href="Modelos_estacionarios_1.html#cb132-3" tabindex="-1"></a>csv_name <span class="ot">&lt;-</span> <span class="st">&quot;suma_3.csv&quot;</span></span>
+<span id="cb132-4"><a href="Modelos_estacionarios_1.html#cb132-4" tabindex="-1"></a>ruta_archivo <span class="ot">&lt;-</span> <span class="fu">file.path</span>(csv_dir, csv_name)</span>
+<span id="cb132-5"><a href="Modelos_estacionarios_1.html#cb132-5" tabindex="-1"></a></span>
+<span id="cb132-6"><a href="Modelos_estacionarios_1.html#cb132-6" tabindex="-1"></a>datos_raw <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(ruta_archivo,</span>
+<span id="cb132-7"><a href="Modelos_estacionarios_1.html#cb132-7" tabindex="-1"></a>                      <span class="at">header =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb132-8"><a href="Modelos_estacionarios_1.html#cb132-8" tabindex="-1"></a>                      <span class="at">sep =</span> <span class="st">&quot;,&quot;</span>,</span>
+<span id="cb132-9"><a href="Modelos_estacionarios_1.html#cb132-9" tabindex="-1"></a>                      <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb132-10"><a href="Modelos_estacionarios_1.html#cb132-10" tabindex="-1"></a></span>
+<span id="cb132-11"><a href="Modelos_estacionarios_1.html#cb132-11" tabindex="-1"></a><span class="fu">str</span>(datos_raw)</span></code></pre></div>
+<pre><code>## &#39;data.frame&#39;:    58448 obs. of  2 variables:
+##  $ FECHA         : chr  &quot;2019-01-01 00:00:00&quot; &quot;2019-01-01 01:00:00&quot; &quot;2019-01-01 02:00:00&quot; &quot;2019-01-01 03:00:00&quot; ...
+##  $ VALOR_IMPUTADO: num  778 766 765 735 731 ...</code></pre>
+<div class="sourceCode" id="cb134"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb134-1"><a href="Modelos_estacionarios_1.html#cb134-1" tabindex="-1"></a><span class="fu">head</span>(datos_raw)</span></code></pre></div>
+<pre><code>##                 FECHA VALOR_IMPUTADO
+## 1 2019-01-01 00:00:00       778.2125
+## 2 2019-01-01 01:00:00       766.2975
+## 3 2019-01-01 02:00:00       764.6450
+## 4 2019-01-01 03:00:00       734.6750
+## 5 2019-01-01 04:00:00       731.0275
+## 6 2019-01-01 05:00:00       735.7500</code></pre>
+</div>
+<div id="limpieza-e-imputación-de-faltantes" class="section level2 hasAnchor" number="6.3">
+<h2><span class="header-section-number">6.3</span> Limpieza e imputación de faltantes<a href="Modelos_estacionarios_1.html#limpieza-e-imputaci%C3%B3n-de-faltantes" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div class="sourceCode" id="cb136"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb136-1"><a href="Modelos_estacionarios_1.html#cb136-1" tabindex="-1"></a>datos <span class="ot">&lt;-</span> datos_raw <span class="sc">%&gt;%</span></span>
+<span id="cb136-2"><a href="Modelos_estacionarios_1.html#cb136-2" tabindex="-1"></a>  janitor<span class="sc">::</span><span class="fu">clean_names</span>() <span class="sc">%&gt;%</span>        <span class="co"># fecha, valor_imputado</span></span>
+<span id="cb136-3"><a href="Modelos_estacionarios_1.html#cb136-3" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb136-4"><a href="Modelos_estacionarios_1.html#cb136-4" tabindex="-1"></a>    <span class="at">fecha =</span> lubridate<span class="sc">::</span><span class="fu">ymd_hms</span>(fecha)</span>
+<span id="cb136-5"><a href="Modelos_estacionarios_1.html#cb136-5" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb136-6"><a href="Modelos_estacionarios_1.html#cb136-6" tabindex="-1"></a>  <span class="fu">arrange</span>(fecha)</span>
+<span id="cb136-7"><a href="Modelos_estacionarios_1.html#cb136-7" tabindex="-1"></a></span>
+<span id="cb136-8"><a href="Modelos_estacionarios_1.html#cb136-8" tabindex="-1"></a><span class="co"># Comprobar NA en la serie</span></span>
+<span id="cb136-9"><a href="Modelos_estacionarios_1.html#cb136-9" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Cantidad de datos faltates, dataset original: &quot;</span>, <span class="fu">sum</span>(<span class="fu">is.na</span>(datos<span class="sc">$</span>valor_imputado)),<span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## Cantidad de datos faltates, dataset original:  456</code></pre>
+<div class="sourceCode" id="cb138"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb138-1"><a href="Modelos_estacionarios_1.html#cb138-1" tabindex="-1"></a><span class="co"># Interpolar NA para no romper la serie horaria</span></span>
+<span id="cb138-2"><a href="Modelos_estacionarios_1.html#cb138-2" tabindex="-1"></a><span class="co"># (usa método de forecast, respeta patrones)</span></span>
+<span id="cb138-3"><a href="Modelos_estacionarios_1.html#cb138-3" tabindex="-1"></a>serie_sin_na <span class="ot">&lt;-</span> forecast<span class="sc">::</span><span class="fu">na.interp</span>(datos<span class="sc">$</span>valor_imputado)</span>
+<span id="cb138-4"><a href="Modelos_estacionarios_1.html#cb138-4" tabindex="-1"></a></span>
+<span id="cb138-5"><a href="Modelos_estacionarios_1.html#cb138-5" tabindex="-1"></a><span class="co"># Volvemos a pegar a los datos</span></span>
+<span id="cb138-6"><a href="Modelos_estacionarios_1.html#cb138-6" tabindex="-1"></a>datos <span class="ot">&lt;-</span> datos <span class="sc">%&gt;%</span></span>
+<span id="cb138-7"><a href="Modelos_estacionarios_1.html#cb138-7" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">valor_imputado =</span> serie_sin_na)</span>
+<span id="cb138-8"><a href="Modelos_estacionarios_1.html#cb138-8" tabindex="-1"></a></span>
+<span id="cb138-9"><a href="Modelos_estacionarios_1.html#cb138-9" tabindex="-1"></a><span class="co"># Comprobar NA en la serie</span></span>
+<span id="cb138-10"><a href="Modelos_estacionarios_1.html#cb138-10" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Cantidad de datos faltates, despues de la imputación: &quot;</span>, <span class="fu">sum</span>(<span class="fu">is.na</span>(datos<span class="sc">$</span>valor_imputado)),<span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## Cantidad de datos faltates, despues de la imputación:  0</code></pre>
+<div class="sourceCode" id="cb140"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb140-1"><a href="Modelos_estacionarios_1.html#cb140-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Resumen Serie de Datos - Potencia Subestación Electrica&quot;</span>,<span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## Resumen Serie de Datos - Potencia Subestación Electrica</code></pre>
+<div class="sourceCode" id="cb142"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb142-1"><a href="Modelos_estacionarios_1.html#cb142-1" tabindex="-1"></a><span class="fu">summary</span>(datos<span class="sc">$</span>valor_imputado)</span></code></pre></div>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##       0    2593    3194    3308    4068    6676</code></pre>
+</div>
+<div id="creación-de-la-serie-de-tiempo" class="section level2 hasAnchor" number="6.4">
+<h2><span class="header-section-number">6.4</span> Creación de la serie de tiempo<a href="Modelos_estacionarios_1.html#creaci%C3%B3n-de-la-serie-de-tiempo" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Es una serie horaria → usamos frecuencia <strong>24</strong> (24 obs = 1 día).</p>
+<div class="sourceCode" id="cb144"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb144-1"><a href="Modelos_estacionarios_1.html#cb144-1" tabindex="-1"></a>serie_ts <span class="ot">&lt;-</span> <span class="fu">ts</span>(datos<span class="sc">$</span>valor_imputado,</span>
+<span id="cb144-2"><a href="Modelos_estacionarios_1.html#cb144-2" tabindex="-1"></a>               <span class="at">frequency =</span> <span class="dv">24</span>)</span>
+<span id="cb144-3"><a href="Modelos_estacionarios_1.html#cb144-3" tabindex="-1"></a></span>
+<span id="cb144-4"><a href="Modelos_estacionarios_1.html#cb144-4" tabindex="-1"></a><span class="fu">head</span>(serie_ts)</span></code></pre></div>
+<pre><code>## Time Series:
+## Start = c(1, 1) 
+## End = c(1, 6) 
+## Frequency = 24 
+## [1] 778.2125 766.2975 764.6450 734.6750 731.0275 735.7500</code></pre>
+</div>
+<div id="exploración-inicial" class="section level2 hasAnchor" number="6.5">
+<h2><span class="header-section-number">6.5</span> Exploración inicial<a href="Modelos_estacionarios_1.html#exploraci%C3%B3n-inicial" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div class="sourceCode" id="cb146"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb146-1"><a href="Modelos_estacionarios_1.html#cb146-1" tabindex="-1"></a><span class="fu">plot</span>(serie_ts,</span>
+<span id="cb146-2"><a href="Modelos_estacionarios_1.html#cb146-2" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">&quot;Serie horaria - suma_3.csv&quot;</span>,</span>
+<span id="cb146-3"><a href="Modelos_estacionarios_1.html#cb146-3" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">&quot;Valor imputado&quot;</span>,</span>
+<span id="cb146-4"><a href="Modelos_estacionarios_1.html#cb146-4" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">&quot;Tiempo&quot;</span>)</span></code></pre></div>
+<p><img src="propuesta-pronostico-subestacion_files/figure-html/exploracion1-1.png" width="960" /></p>
+<div class="sourceCode" id="cb147"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb147-1"><a href="Modelos_estacionarios_1.html#cb147-1" tabindex="-1"></a><span class="fu">summary</span>(serie_ts)</span></code></pre></div>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##       0    2593    3194    3308    4068    6676</code></pre>
+<ul>
+<li><p>Se observa una tendencia creciente en los valores a lo largo del tiempo. Esto indica que, en promedio, los valores potencia aumentan progresivamente, sobre todo a partir de la mitad de la serie. Esto sugiere que la serie no es estacionaria en nivel, por lo que requerirá diferenciación (al menos una vez) para aplicar correctamente un modelo ARIMA.</p></li>
+<li><p>El valor medio es de ≈3308, pero hay una gran dispersión (de 0 a 6676).</p></li>
+<li><p>La asimetría positiva (cola hacia la derecha) se nota en que la media &gt; mediana, lo que indica presencia de valores atípicos altos.</p></li>
+<li><p>El rango intercuartílico (4068–2593 = 1475) sugiere variabilidad notable incluso entre valores centrales.</p></li>
+<li><p>La serie presenta fluctuaciones bruscas (picos y caídas intensas). Esto puede deberse a variaciones horarias (por ejemplo, demanda, flujo o carga) con ciclos diarios.</p></li>
+<li><p>Podría haber componentes estacionales (cada 24 horas o cada semana), visibles como “bandas” de oscilación repetitiva.</p></li>
+<li><p>Existen observaciones con valor cercano a 0, muy por debajo del comportamiento típico. Esto puede representar horas sin registro, fallas o eventos extremos.</p></li>
+<li><p>Los valores tienden a crecer con el tiempo, manteniendo una variabilidad considerable y ciclos repetitivos, lo que sugiere que la serie responde a un fenómeno con tendencia positiva y fluctuaciones horarias marcadas.</p></li>
+</ul>
+</div>
+<div id="estacionariedad-adf-y-acfpacf" class="section level2 hasAnchor" number="6.6">
+<h2><span class="header-section-number">6.6</span> Estacionariedad (ADF) y ACF/PACF<a href="Modelos_estacionarios_1.html#estacionariedad-adf-y-acfpacf" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Verificamos estacionariedad de la serie aplicando el test de Dickey-Fuller aumentada.</p>
+<div class="sourceCode" id="cb149"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb149-1"><a href="Modelos_estacionarios_1.html#cb149-1" tabindex="-1"></a><span class="co"># prueba de Dickey-Fuller aumentada</span></span>
+<span id="cb149-2"><a href="Modelos_estacionarios_1.html#cb149-2" tabindex="-1"></a>tseries<span class="sc">::</span><span class="fu">adf.test</span>(serie_ts)</span></code></pre></div>
+<pre><code>## 
+##  Augmented Dickey-Fuller Test
+## 
+## data:  serie_ts
+## Dickey-Fuller = -14.565, Lag order = 38, p-value = 0.01
+## alternative hypothesis: stationary</code></pre>
+<div class="sourceCode" id="cb151"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb151-1"><a href="Modelos_estacionarios_1.html#cb151-1" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb151-2"><a href="Modelos_estacionarios_1.html#cb151-2" tabindex="-1"></a><span class="fu">Acf</span>(serie_ts, <span class="at">main =</span> <span class="st">&quot;ACF serie original&quot;</span>)</span>
+<span id="cb151-3"><a href="Modelos_estacionarios_1.html#cb151-3" tabindex="-1"></a><span class="fu">Pacf</span>(serie_ts, <span class="at">main =</span> <span class="st">&quot;PACF serie original&quot;</span>)</span></code></pre></div>
+<p><img src="propuesta-pronostico-subestacion_files/figure-html/adf-acf-pacf1-1.png" width="960" /></p>
+<div class="sourceCode" id="cb152"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb152-1"><a href="Modelos_estacionarios_1.html#cb152-1" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
+<p><strong>Interpretación prueba de Dickey–Fuller aumentada (ADF)</strong></p>
+<ul>
+<li><p>Hipótesis nula (H₀): la serie no es estacionaria.</p></li>
+<li><p>Hipótesis alternativa (H₁): la serie es estacionaria.</p></li>
+<li><p>El p-valor = 0.01 &lt; 0.05, se rechaza la hipótesis nula (H₀), la serie es estacionaria.</p></li>
+<li><p>La serie de tiempo puede considerarse estacionaria en nivel (sin necesidad de diferenciación adicional).</p></li>
+<li><p>El resultado sugiere que la serie se mantiene estable en su media y varianza a lo largo del tiempo.</p></li>
+</ul>
+<p><strong>Interpretación Autocorrelación (ACF)</strong></p>
+<ul>
+<li><p>La ACF muestra valores muy altos y lentamente decrecientes, con un patrón oscilante y periódico (las barras suben y bajan en forma de ondas regulares). Esto indica la presencia de una fuerte estacionalidad y una posible autocorrelación prolongada entre observaciones separadas por intervalos fijos (lags).</p></li>
+<li><p>El patrón de repetición parece producirse cada 24 rezagos, lo cual coincide con la frecuencia horaria diaria establecida para esta serie (24 horas).</p></li>
+<li><p>La serie presenta una estructura cíclica o estacional de 24 horas, con una alta correlación entre valores próximos en el tiempo. La lentitud en el decaimiento confirma que la serie es altamente persistente y tiene una memoria larga.</p></li>
+</ul>
+<p><strong>Interpretación Autocorrelación Parcial (PACF)</strong></p>
+<ul>
+<li><p>En la grafica PACF se observa un pico muy alto en el primer rezago (lag = 1), seguido de valores que decrecen y fluctúan alrededor de cero. Esto sugiere que el comportamiento actual depende principalmente del valor inmediatamente anterior (autoregresión de orden 1), mientras que los efectos de rezagos posteriores se diluyen rápidamente. No obstante, se observan pequeños picos periódicos alrededor de los múltiplos de 24 (lag ≈ 24, 48), lo que refuerza la hipótesis de una componente estacional diaria.</p></li>
+<li><p>El corte brusco en el primer rezago (lag = 1) sugiere una componente autoregresiva (AR) de bajo orden, probablemente AR(1), mientras que los picos en múltiplos de 24 apuntan a un posible componente estacional AR(1) con periodo 24.</p></li>
+</ul>
+<p>Los gráficos orientan hacia modelos del tipo <strong>ARIMA(1,0,0)(1,0,0)[24]</strong>, donde:</p>
+<p>p = 1 → autoregresivo de orden 1 (por PACF),</p>
+<p>d = 0 → la serie ya es estacionaria (por ADF),</p>
+<p>q = 0 → no se observa corte abrupto en la ACF,</p>
+<p>(P,D,Q)[24] → componente estacional con periodo 24 (por patrón repetitivo en ACF/PACF).</p>
+<p>Las funciones ACF y PACF de la serie de potencia eléctrica evidencian un comportamiento altamente correlacionado en el corto plazo y una fuerte estacionalidad diaria (cada 24 horas). Se recomienda probar modelos con componente autoregresiva simple (AR(1)) y término estacional (P=1, periodo=24), verificando su ajuste con criterios AIC/BIC y el análisis de residuos.</p>
+<div class="sourceCode" id="cb153"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb153-1"><a href="Modelos_estacionarios_1.html#cb153-1" tabindex="-1"></a>d_sugerido <span class="ot">&lt;-</span> forecast<span class="sc">::</span><span class="fu">ndiffs</span>(serie_ts)</span>
+<span id="cb153-2"><a href="Modelos_estacionarios_1.html#cb153-2" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Diferenciaciones sugeridas por ndiffs:&quot;</span>, d_sugerido, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## Diferenciaciones sugeridas por ndiffs: 1</code></pre>
+<div class="sourceCode" id="cb155"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb155-1"><a href="Modelos_estacionarios_1.html#cb155-1" tabindex="-1"></a>serie_diff1 <span class="ot">&lt;-</span> <span class="fu">diff</span>(serie_ts, <span class="at">differences =</span> d_sugerido)</span>
+<span id="cb155-2"><a href="Modelos_estacionarios_1.html#cb155-2" tabindex="-1"></a></span>
+<span id="cb155-3"><a href="Modelos_estacionarios_1.html#cb155-3" tabindex="-1"></a>tseries<span class="sc">::</span><span class="fu">adf.test</span>(serie_diff1)</span></code></pre></div>
+<pre><code>## 
+##  Augmented Dickey-Fuller Test
+## 
+## data:  serie_diff1
+## Dickey-Fuller = -55.722, Lag order = 38, p-value = 0.01
+## alternative hypothesis: stationary</code></pre>
+<div class="sourceCode" id="cb157"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb157-1"><a href="Modelos_estacionarios_1.html#cb157-1" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb157-2"><a href="Modelos_estacionarios_1.html#cb157-2" tabindex="-1"></a><span class="fu">Acf</span>(serie_diff1, <span class="at">main =</span> <span class="st">&quot;ACF 1ra diferencia&quot;</span>)</span>
+<span id="cb157-3"><a href="Modelos_estacionarios_1.html#cb157-3" tabindex="-1"></a><span class="fu">Pacf</span>(serie_diff1, <span class="at">main =</span> <span class="st">&quot;PACF 1ra diferencia&quot;</span>)</span></code></pre></div>
+<p><img src="propuesta-pronostico-subestacion_files/figure-html/diferenciacion1-1.png" width="960" /></p>
+<div class="sourceCode" id="cb158"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb158-1"><a href="Modelos_estacionarios_1.html#cb158-1" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
+<p><strong>Interpretación prueba de Dickey–Fuller aumentada (ADF) de la serie diferenciada</strong></p>
+<ul>
+<li><p>Hipótesis nula (H₀): la serie no es estacionaria.</p></li>
+<li><p>Hipótesis alternativa (H₁): la serie es estacionaria.</p></li>
+<li><p>El p-valor = 0.01 &lt; 0.05, se rechaza la hipótesis nula (H₀), la serie es estacionaria.</p></li>
+</ul>
+<p><strong>Interpretación Autocorrelación (ACF) de la serie diferenciada</strong></p>
+<ul>
+<li><p>La ACF muestra que la mayoría de las barras están dentro de las bandas azules (intervalos de confianza), excepto algunos picos notables alrededor de los rezagos 24 y 48. Estos picos recurrentes cada 24 lags confirman una estacionalidad horaria diaria, incluso después de eliminar la tendencia con la primera diferencia. El resto de las autocorrelaciones son pequeñas y se disipan rápidamente, lo cual indica que la serie ya no tiene persistencia fuerte ni tendencia.</p></li>
+<li><p>La primera diferencia logró eliminar la tendencia y la autocorrelación prolongada, pero aún queda un componente estacional diario que podría modelarse con una parte estacional AR o MA con periodo 24.</p></li>
+</ul>
+<p><strong>Interpretación Autocorrelación Parcial (PACF) de la serie diferenciada</strong></p>
+<ul>
+<li><p>La PACF muestra un pico pequeño pero significativo en lag 1, y otro alrededor de lag 24, mientras los demás valores se mantienen cerca de cero. Este patrón sugiere que la serie diferenciada tiene un componente autoregresivo de corto plazo (AR(1)) y una componente estacional autoregresiva (AR(1) estacional).</p></li>
+<li><p>La estructura sugiere un modelo con un término AR(1) y un posible componente AR(1) estacional con periodo 24, lo que respalda la idea de un ARIMA(1,1,0)(1,0,0)[24] o similar.</p></li>
+</ul>
+<p>En conclusión, Luego de aplicar la primera diferencia, la serie se vuelve estacionaria, eliminando la tendencia observada en el nivel original. Sin embargo, persisten picos en múltiplos de 24, lo que indica una estacionalidad horaria. Por tanto, un modelo apropiado podría ser un <strong>ARIMA(1,1,0)(1,0,0)[24]</strong>, donde: la primera diferencia (d=1) captura la tendencia, el término AR(1) modela la autocorrelación inmediata y el término AR(1) estacional modela los ciclos diarios.</p>
+</div>
+<div id="modelo-arima-boxjenkins" class="section level2 hasAnchor" number="6.7">
+<h2><span class="header-section-number">6.7</span> Modelo ARIMA (Box–Jenkins)<a href="Modelos_estacionarios_1.html#modelo-arima-boxjenkins" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div class="sourceCode" id="cb159"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb159-1"><a href="Modelos_estacionarios_1.html#cb159-1" tabindex="-1"></a>modelo_auto <span class="ot">&lt;-</span> forecast<span class="sc">::</span><span class="fu">auto.arima</span>(</span>
+<span id="cb159-2"><a href="Modelos_estacionarios_1.html#cb159-2" tabindex="-1"></a>  serie_ts,</span>
+<span id="cb159-3"><a href="Modelos_estacionarios_1.html#cb159-3" tabindex="-1"></a>  <span class="at">seasonal =</span> <span class="cn">TRUE</span>,      <span class="co"># intenta estacionalidad diaria (24)</span></span>
+<span id="cb159-4"><a href="Modelos_estacionarios_1.html#cb159-4" tabindex="-1"></a>  <span class="at">stepwise =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb159-5"><a href="Modelos_estacionarios_1.html#cb159-5" tabindex="-1"></a>  <span class="at">approximation =</span> <span class="cn">TRUE</span></span>
+<span id="cb159-6"><a href="Modelos_estacionarios_1.html#cb159-6" tabindex="-1"></a>)</span>
+<span id="cb159-7"><a href="Modelos_estacionarios_1.html#cb159-7" tabindex="-1"></a></span>
+<span id="cb159-8"><a href="Modelos_estacionarios_1.html#cb159-8" tabindex="-1"></a>modelo_auto</span></code></pre></div>
+<pre><code>## Series: serie_ts 
+## ARIMA(3,0,0)(2,1,0)[24] 
+## 
+## Coefficients:
+##          ar1      ar2     ar3     sar1     sar2
+##       1.0357  -0.2212  0.0816  -0.6358  -0.3182
+## s.e.  0.0041   0.0059  0.0042   0.0039   0.0039
+## 
+## sigma^2 = 26493:  log likelihood = -380417.2
+## AIC=760846.5   AICc=760846.5   BIC=760900.4</code></pre>
+<div class="sourceCode" id="cb161"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb161-1"><a href="Modelos_estacionarios_1.html#cb161-1" tabindex="-1"></a><span class="fu">AIC</span>(modelo_auto); <span class="fu">BIC</span>(modelo_auto)</span></code></pre></div>
+<pre><code>## [1] 760846.5</code></pre>
+<pre><code>## [1] 760900.4</code></pre>
+<p><strong>Interpretación resultado auto.arima</strong></p>
+<p>El algoritmo auto.arima() escogió el siguiente modelo:</p>
+<p>ARIMA(3,0,0)(2,1,0)[24]</p>
+<p>Modelo AutoRegresivo Integrado de Media Móvil con:</p>
+<ul>
+<li><p>3 términos autorregresivos no estacionales (AR(3)). El valor actual depende de los tres valores anteriores inmediatos. Captura la inercia o persistencia de corto plazo.</p></li>
+<li><p>0 diferencias no estacionales (d = 0). No se necesitó diferencia no estacional, la serie es estacionaria en nivel, como confirmó la prueba ADF (p-value = 0.01).</p></li>
+<li><p>sin componente de media móvil (q = 0).</p></li>
+<li><p>2 términos autorregresivos estacionales (P = 2). Se incorporaron dos términos AR estacionales (SAR1, SAR2) para modelar la estructura diaria.</p></li>
+<li><p>1 diferencia estacional (D = 1). Se aplicó una diferenciación estacional (D=1) para eliminar los ciclos repetitivos.</p></li>
+<li><p>sin componenete de Media móvil estacional.</p></li>
+<li><p>Un periodo estacional de 24, es decir, un ciclo diario (horario → 24 horas).</p></li>
+</ul>
+<p>El modelo <strong>ARIMA(3,0,0)(2,1,0)[24]</strong> describe una serie con dependencia de corto plazo (cada valor depende de los 3 anteriores), con comportamiento estacional diario y con fluctuaciones moderadas alrededor de un nivel estable.</p>
+<p>El valor de potencia eléctrica en una hora depende fuertemente de las tres horas previas y también del comportamiento del mismo periodo en los dos días anteriores.</p>
+</div>
+<div id="comparación-de-modelos-aicbic" class="section level2 hasAnchor" number="6.8">
+<h2><span class="header-section-number">6.8</span> Comparación de modelos (AIC/BIC)<a href="Modelos_estacionarios_1.html#comparaci%C3%B3n-de-modelos-aicbic" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div class="sourceCode" id="cb164"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb164-1"><a href="Modelos_estacionarios_1.html#cb164-1" tabindex="-1"></a><span class="co"># Modelo ARIMA según ACF/PACF, serie orginal --&gt; **ARIMA(1,0,0)(1,0,0)[24]**</span></span>
+<span id="cb164-2"><a href="Modelos_estacionarios_1.html#cb164-2" tabindex="-1"></a></span>
+<span id="cb164-3"><a href="Modelos_estacionarios_1.html#cb164-3" tabindex="-1"></a>modelo_alt1 <span class="ot">&lt;-</span> forecast<span class="sc">::</span><span class="fu">Arima</span>(</span>
+<span id="cb164-4"><a href="Modelos_estacionarios_1.html#cb164-4" tabindex="-1"></a>  serie_ts,</span>
+<span id="cb164-5"><a href="Modelos_estacionarios_1.html#cb164-5" tabindex="-1"></a>  <span class="at">order =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>),                   <span class="co"># (p,d,q) no estacional</span></span>
+<span id="cb164-6"><a href="Modelos_estacionarios_1.html#cb164-6" tabindex="-1"></a>  <span class="at">seasonal =</span> <span class="fu">list</span>(</span>
+<span id="cb164-7"><a href="Modelos_estacionarios_1.html#cb164-7" tabindex="-1"></a>    <span class="at">order =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>),                 <span class="co"># (P,D,Q) estacional</span></span>
+<span id="cb164-8"><a href="Modelos_estacionarios_1.html#cb164-8" tabindex="-1"></a>    <span class="at">period =</span> <span class="dv">24</span>                         <span class="co"># s = 24</span></span>
+<span id="cb164-9"><a href="Modelos_estacionarios_1.html#cb164-9" tabindex="-1"></a>  )</span>
+<span id="cb164-10"><a href="Modelos_estacionarios_1.html#cb164-10" tabindex="-1"></a>)</span>
+<span id="cb164-11"><a href="Modelos_estacionarios_1.html#cb164-11" tabindex="-1"></a></span>
+<span id="cb164-12"><a href="Modelos_estacionarios_1.html#cb164-12" tabindex="-1"></a><span class="co"># Modelo ARIMA según ACF/PACF, serie diferenciada --&gt; **ARIMA(1,1,0)(1,0,0)[24]**</span></span>
+<span id="cb164-13"><a href="Modelos_estacionarios_1.html#cb164-13" tabindex="-1"></a></span>
+<span id="cb164-14"><a href="Modelos_estacionarios_1.html#cb164-14" tabindex="-1"></a>modelo_alt2 <span class="ot">&lt;-</span> forecast<span class="sc">::</span><span class="fu">Arima</span>(</span>
+<span id="cb164-15"><a href="Modelos_estacionarios_1.html#cb164-15" tabindex="-1"></a>  serie_ts,</span>
+<span id="cb164-16"><a href="Modelos_estacionarios_1.html#cb164-16" tabindex="-1"></a>  <span class="at">order =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>),                   <span class="co"># (p,d,q) no estacional</span></span>
+<span id="cb164-17"><a href="Modelos_estacionarios_1.html#cb164-17" tabindex="-1"></a>  <span class="at">seasonal =</span> <span class="fu">list</span>(</span>
+<span id="cb164-18"><a href="Modelos_estacionarios_1.html#cb164-18" tabindex="-1"></a>    <span class="at">order =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>),                 <span class="co"># (P,D,Q) estacional</span></span>
+<span id="cb164-19"><a href="Modelos_estacionarios_1.html#cb164-19" tabindex="-1"></a>    <span class="at">period =</span> <span class="dv">24</span>                         <span class="co"># s = 24</span></span>
+<span id="cb164-20"><a href="Modelos_estacionarios_1.html#cb164-20" tabindex="-1"></a>  )</span>
+<span id="cb164-21"><a href="Modelos_estacionarios_1.html#cb164-21" tabindex="-1"></a>)</span>
+<span id="cb164-22"><a href="Modelos_estacionarios_1.html#cb164-22" tabindex="-1"></a></span>
+<span id="cb164-23"><a href="Modelos_estacionarios_1.html#cb164-23" tabindex="-1"></a></span>
+<span id="cb164-24"><a href="Modelos_estacionarios_1.html#cb164-24" tabindex="-1"></a>tibble<span class="sc">::</span><span class="fu">tibble</span>(</span>
+<span id="cb164-25"><a href="Modelos_estacionarios_1.html#cb164-25" tabindex="-1"></a>  <span class="at">modelo =</span> <span class="fu">c</span>(<span class="st">&quot;auto.arima()=ARIMA(3,0,0)(2,1,0)[24]&quot;</span>, <span class="st">&quot;ARIMA(1,0,0)(1,0,0)[24]&quot;</span>, <span class="st">&quot;ARIMA(1,1,0)(1,0,0)[24]&quot;</span>),</span>
+<span id="cb164-26"><a href="Modelos_estacionarios_1.html#cb164-26" tabindex="-1"></a>  <span class="at">AIC =</span> <span class="fu">c</span>(<span class="fu">AIC</span>(modelo_auto), <span class="fu">AIC</span>(modelo_alt1), <span class="fu">AIC</span>(modelo_alt2)),</span>
+<span id="cb164-27"><a href="Modelos_estacionarios_1.html#cb164-27" tabindex="-1"></a>  <span class="at">BIC =</span> <span class="fu">c</span>(<span class="fu">BIC</span>(modelo_auto), <span class="fu">BIC</span>(modelo_alt1), <span class="fu">BIC</span>(modelo_alt2))</span>
+<span id="cb164-28"><a href="Modelos_estacionarios_1.html#cb164-28" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## # A tibble: 3 × 3
+##   modelo                                   AIC     BIC
+##   &lt;chr&gt;                                  &lt;dbl&gt;   &lt;dbl&gt;
+## 1 auto.arima()=ARIMA(3,0,0)(2,1,0)[24] 760847. 760900.
+## 2 ARIMA(1,0,0)(1,0,0)[24]              769852. 769888.
+## 3 ARIMA(1,1,0)(1,0,0)[24]              769697. 769724.</code></pre>
+<p><strong>AIC (Akaike Information Criterion)</strong> Evalúa la calidad del modelo considerando el ajuste y el número de parámetros. Cuanto menor sea el AIC, mejor el equilibrio entre ajuste y complejidad.</p>
+<p><strong>BIC (Bayesian Information Criterion)</strong> Evalúa la calidad del modelo considerando el ajuste y el número de parámetros, pero penaliza más la cantidad de parámetros. Cuanto menor sea el BIC, mejor, especialmente para modelos más simples y generalizables.</p>
+<ul>
+<li><p>El ARIMA(3,0,0)(2,1,0)[24] es el modelo más adecuado porque presenta los menores valores de AIC y BIC, lo que indica un mejor ajuste sin sobreparametrización.</p></li>
+<li><p>Los otros modelos (ARIMA(1,0,0)(1,0,0)[24] y ARIMA(1,1,0)(1,0,0)[24]) son más parsimoniosos, pero no logran capturar la complejidad temporal y estacional de la serie.</p></li>
+<li><p>La diferencia de casi 9000 unidades en AIC es muy grande, lo que refuerza que el modelo ganador tiene una capacidad predictiva muy superior.</p></li>
+<li><p>El modelo ARIMA(3,0,0)(2,1,0)[24] logra equilibrar correctamente la dependencia temporal a corto plazo (AR(3)), la estructura estacional diaria (SAR(2) con periodo 24) y la estabilidad lograda mediante una diferencia estacional (D=1). Sus criterios AIC y BIC significativamente más bajos indican que este modelo representa mejor el comportamiento real de la serie que las alternativas más simples.</p></li>
+</ul>
+</div>
+<div id="diagnóstico" class="section level2 hasAnchor" number="6.9">
+<h2><span class="header-section-number">6.9</span> Diagnóstico<a href="Modelos_estacionarios_1.html#diagn%C3%B3stico" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div class="sourceCode" id="cb166"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb166-1"><a href="Modelos_estacionarios_1.html#cb166-1" tabindex="-1"></a>forecast<span class="sc">::</span><span class="fu">checkresiduals</span>(modelo_auto)</span></code></pre></div>
+<p><img src="propuesta-pronostico-subestacion_files/figure-html/diagnostico1-1.png" width="960" /></p>
+<pre><code>## 
+##  Ljung-Box test
+## 
+## data:  Residuals from ARIMA(3,0,0)(2,1,0)[24]
+## Q* = 1969.2, df = 43, p-value &lt; 2.2e-16
+## 
+## Model df: 5.   Total lags used: 48</code></pre>
+<p><strong><em>Ljung-Box test</em></strong></p>
+<ul>
+<li>p-value &lt; 2.2e-16, se rechaza H₀ (los residuos son ruido blanco). Los residuos no son ruido blanco, aún contienen autocorrelación significativa no explicada por el modelo. El modelo no captura completamente la estructura temporal de la serie.</li>
+</ul>
+<p><strong><em>Diagnósticos residuales del modelo ARIMA</em></strong></p>
+<ul>
+<li>Se observa que los residuos oscilan alrededor de cero, lo cual es una buena señal: no hay tendencia sistemática ni acumulación de errores. Sin embargo, todavía hay picos grandes (outliers) que sobresalen en varios puntos, tanto positivos como negativos, indicando que hay algunos valores atípicos o eventos anómalos que el modelo no logra explicar del todo. Aun así, la varianza de los residuos se mantiene más o menos constante, tiene una homocedasticidad razonable.</li>
+</ul>
+<p><strong>ACF (Función de Autocorrelación de los residuos)</strong></p>
+<ul>
+<li><p>En el gráfico, la mayoría de los valores están dentro de las bandas azules, pero hay algunos picos leves en múltiplos de 24, lo que sugiere que todavía queda algo de correlación estacional residual. Si el modelo es adecuado, las barras de la ACF deben estar dentro de las bandas azules (intervalos de confianza), lo que indica falta de autocorrelación.</p></li>
+<li><p>Los residuos no son completamente ruido blanco: hay indicios de correlación estacional leve, posiblemente asociada a patrones diarios que el modelo no capturó totalmente.</p></li>
+</ul>
+<p><strong>Histograma y densidad de los residuos</strong></p>
+<ul>
+<li><p>La distribución de los residuos es centrada en cero. No obstante, la forma es muy aguda (leptocúrtica): la mayoría de los valores están cerca de 0, pero con colas largas (picos extremos en ±4000). Esto indica que los errores no siguen perfectamente una distribución normal, sino que presentan eventos raros de alta magnitud, coherente con los picos observados en la gráfica superior.</p></li>
+<li><p>Aunque el modelo explica bien la tendencia y estacionalidad, los residuos no son perfectamente normales y muestran valores extremos — posiblemente debidos a shocks o outliers estructurales.</p></li>
+</ul>
+<p>El modelo ARIMA(3,0,0)(2,1,0)[24] captura correctamente la tendencia y la estacionalidad principal, pero no elimina completamente la autocorrelación en los residuos. Persisten dependencias estacionales y algunos valores extremos.</p>
+</div>
+<div id="pronóstico" class="section level2 hasAnchor" number="6.10">
+<h2><span class="header-section-number">6.10</span> Pronóstico<a href="Modelos_estacionarios_1.html#pron%C3%B3stico" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div class="sourceCode" id="cb168"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb168-1"><a href="Modelos_estacionarios_1.html#cb168-1" tabindex="-1"></a>h <span class="ot">&lt;-</span> <span class="dv">24</span>   <span class="co"># 24 horas siguientes</span></span>
+<span id="cb168-2"><a href="Modelos_estacionarios_1.html#cb168-2" tabindex="-1"></a>pronostico <span class="ot">&lt;-</span> forecast<span class="sc">::</span><span class="fu">forecast</span>(modelo_auto, <span class="at">h =</span> h)</span>
+<span id="cb168-3"><a href="Modelos_estacionarios_1.html#cb168-3" tabindex="-1"></a></span>
+<span id="cb168-4"><a href="Modelos_estacionarios_1.html#cb168-4" tabindex="-1"></a><span class="fu">autoplot</span>(pronostico) <span class="sc">+</span></span>
+<span id="cb168-5"><a href="Modelos_estacionarios_1.html#cb168-5" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Pronóstico ARIMA sobre suma_3.csv&quot;</span>,</span>
+<span id="cb168-6"><a href="Modelos_estacionarios_1.html#cb168-6" tabindex="-1"></a>                <span class="at">x =</span> <span class="st">&quot;Tiempo&quot;</span>,</span>
+<span id="cb168-7"><a href="Modelos_estacionarios_1.html#cb168-7" tabindex="-1"></a>                <span class="at">y =</span> <span class="st">&quot;Valor&quot;</span>)</span></code></pre></div>
+<p><img src="propuesta-pronostico-subestacion_files/figure-html/pronostico11-1.png" width="960" /></p>
+<div id="zoom-últimos-7-días-pronóstico" class="section level3 hasAnchor" number="6.10.1">
+<h3><span class="header-section-number">6.10.1</span> Zoom: últimos 7 días + pronóstico<a href="Modelos_estacionarios_1.html#zoom-%C3%BAltimos-7-d%C3%ADas-pron%C3%B3stico" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb169"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb169-1"><a href="Modelos_estacionarios_1.html#cb169-1" tabindex="-1"></a><span class="co"># 7 días en serie horaria = 7 * 24</span></span>
+<span id="cb169-2"><a href="Modelos_estacionarios_1.html#cb169-2" tabindex="-1"></a>n_dias <span class="ot">&lt;-</span> <span class="dv">7</span></span>
+<span id="cb169-3"><a href="Modelos_estacionarios_1.html#cb169-3" tabindex="-1"></a>n_obs_zoom <span class="ot">&lt;-</span> n_dias <span class="sc">*</span> <span class="dv">24</span></span>
+<span id="cb169-4"><a href="Modelos_estacionarios_1.html#cb169-4" tabindex="-1"></a></span>
+<span id="cb169-5"><a href="Modelos_estacionarios_1.html#cb169-5" tabindex="-1"></a><span class="co"># Últimas 168 obs reales</span></span>
+<span id="cb169-6"><a href="Modelos_estacionarios_1.html#cb169-6" tabindex="-1"></a>datos_zoom <span class="ot">&lt;-</span> <span class="fu">tail</span>(datos, n_obs_zoom)</span>
+<span id="cb169-7"><a href="Modelos_estacionarios_1.html#cb169-7" tabindex="-1"></a></span>
+<span id="cb169-8"><a href="Modelos_estacionarios_1.html#cb169-8" tabindex="-1"></a><span class="co"># Construir data frame del pronóstico con fecha-hora continua</span></span>
+<span id="cb169-9"><a href="Modelos_estacionarios_1.html#cb169-9" tabindex="-1"></a><span class="co"># última fecha observada:</span></span>
+<span id="cb169-10"><a href="Modelos_estacionarios_1.html#cb169-10" tabindex="-1"></a>ultima_fecha <span class="ot">&lt;-</span> <span class="fu">max</span>(datos<span class="sc">$</span>fecha, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb169-11"><a href="Modelos_estacionarios_1.html#cb169-11" tabindex="-1"></a></span>
+<span id="cb169-12"><a href="Modelos_estacionarios_1.html#cb169-12" tabindex="-1"></a><span class="co"># secuencia de horas posteriores para el forecast</span></span>
+<span id="cb169-13"><a href="Modelos_estacionarios_1.html#cb169-13" tabindex="-1"></a>fechas_forecast <span class="ot">&lt;-</span> ultima_fecha <span class="sc">+</span> lubridate<span class="sc">::</span><span class="fu">hours</span>(<span class="dv">1</span><span class="sc">:</span>h)</span>
+<span id="cb169-14"><a href="Modelos_estacionarios_1.html#cb169-14" tabindex="-1"></a></span>
+<span id="cb169-15"><a href="Modelos_estacionarios_1.html#cb169-15" tabindex="-1"></a>df_forecast <span class="ot">&lt;-</span> tibble<span class="sc">::</span><span class="fu">tibble</span>(</span>
+<span id="cb169-16"><a href="Modelos_estacionarios_1.html#cb169-16" tabindex="-1"></a>  <span class="at">fecha =</span> fechas_forecast,</span>
+<span id="cb169-17"><a href="Modelos_estacionarios_1.html#cb169-17" tabindex="-1"></a>  <span class="at">valor =</span> <span class="fu">as.numeric</span>(pronostico<span class="sc">$</span>mean),</span>
+<span id="cb169-18"><a href="Modelos_estacionarios_1.html#cb169-18" tabindex="-1"></a>  <span class="at">tipo  =</span> <span class="st">&quot;Pronóstico&quot;</span></span>
+<span id="cb169-19"><a href="Modelos_estacionarios_1.html#cb169-19" tabindex="-1"></a>)</span>
+<span id="cb169-20"><a href="Modelos_estacionarios_1.html#cb169-20" tabindex="-1"></a></span>
+<span id="cb169-21"><a href="Modelos_estacionarios_1.html#cb169-21" tabindex="-1"></a>df_hist <span class="ot">&lt;-</span> tibble<span class="sc">::</span><span class="fu">tibble</span>(</span>
+<span id="cb169-22"><a href="Modelos_estacionarios_1.html#cb169-22" tabindex="-1"></a>  <span class="at">fecha =</span> datos_zoom<span class="sc">$</span>fecha,</span>
+<span id="cb169-23"><a href="Modelos_estacionarios_1.html#cb169-23" tabindex="-1"></a>  <span class="at">valor =</span> datos_zoom<span class="sc">$</span>valor_imputado,</span>
+<span id="cb169-24"><a href="Modelos_estacionarios_1.html#cb169-24" tabindex="-1"></a>  <span class="at">tipo  =</span> <span class="st">&quot;Observado&quot;</span></span>
+<span id="cb169-25"><a href="Modelos_estacionarios_1.html#cb169-25" tabindex="-1"></a>)</span>
+<span id="cb169-26"><a href="Modelos_estacionarios_1.html#cb169-26" tabindex="-1"></a></span>
+<span id="cb169-27"><a href="Modelos_estacionarios_1.html#cb169-27" tabindex="-1"></a>df_plot <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">bind_rows</span>(df_hist, df_forecast)</span>
+<span id="cb169-28"><a href="Modelos_estacionarios_1.html#cb169-28" tabindex="-1"></a></span>
+<span id="cb169-29"><a href="Modelos_estacionarios_1.html#cb169-29" tabindex="-1"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(df_plot, ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">x =</span> fecha, <span class="at">y =</span> valor, <span class="at">color =</span> tipo)) <span class="sc">+</span></span>
+<span id="cb169-30"><a href="Modelos_estacionarios_1.html#cb169-30" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb169-31"><a href="Modelos_estacionarios_1.html#cb169-31" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(</span>
+<span id="cb169-32"><a href="Modelos_estacionarios_1.html#cb169-32" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;Últimos 7 días + 24 horas pronosticadas&quot;</span>,</span>
+<span id="cb169-33"><a href="Modelos_estacionarios_1.html#cb169-33" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;Fecha-hora&quot;</span>,</span>
+<span id="cb169-34"><a href="Modelos_estacionarios_1.html#cb169-34" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;Valor&quot;</span></span>
+<span id="cb169-35"><a href="Modelos_estacionarios_1.html#cb169-35" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb169-36"><a href="Modelos_estacionarios_1.html#cb169-36" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">&quot;Observado&quot;</span> <span class="ot">=</span> <span class="st">&quot;black&quot;</span>, <span class="st">&quot;Pronóstico&quot;</span> <span class="ot">=</span> <span class="st">&quot;red&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb169-37"><a href="Modelos_estacionarios_1.html#cb169-37" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">theme_minimal</span>()</span></code></pre></div>
+<p><img src="propuesta-pronostico-subestacion_files/figure-html/zoom-7-dias11-1.png" width="960" /></p>
+</div>
+<div id="zoom-últimos-21-días-7-días-de-pronóstico" class="section level3 hasAnchor" number="6.10.2">
+<h3><span class="header-section-number">6.10.2</span> Zoom: últimos 21 días + 7 días de pronóstico<a href="Modelos_estacionarios_1.html#zoom-%C3%BAltimos-21-d%C3%ADas-7-d%C3%ADas-de-pron%C3%B3stico" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb170"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb170-1"><a href="Modelos_estacionarios_1.html#cb170-1" tabindex="-1"></a><span class="co"># 1. Parámetros</span></span>
+<span id="cb170-2"><a href="Modelos_estacionarios_1.html#cb170-2" tabindex="-1"></a>dias_hist <span class="ot">&lt;-</span> <span class="dv">21</span></span>
+<span id="cb170-3"><a href="Modelos_estacionarios_1.html#cb170-3" tabindex="-1"></a>dias_forecast <span class="ot">&lt;-</span> <span class="dv">7</span></span>
+<span id="cb170-4"><a href="Modelos_estacionarios_1.html#cb170-4" tabindex="-1"></a></span>
+<span id="cb170-5"><a href="Modelos_estacionarios_1.html#cb170-5" tabindex="-1"></a>n_obs_hist <span class="ot">&lt;-</span> dias_hist <span class="sc">*</span> <span class="dv">24</span></span>
+<span id="cb170-6"><a href="Modelos_estacionarios_1.html#cb170-6" tabindex="-1"></a>h <span class="ot">&lt;-</span> dias_forecast <span class="sc">*</span> <span class="dv">24</span>   <span class="co"># 7 días de pronóstico</span></span>
+<span id="cb170-7"><a href="Modelos_estacionarios_1.html#cb170-7" tabindex="-1"></a></span>
+<span id="cb170-8"><a href="Modelos_estacionarios_1.html#cb170-8" tabindex="-1"></a><span class="co"># 2. Pronóstico a 7 días</span></span>
+<span id="cb170-9"><a href="Modelos_estacionarios_1.html#cb170-9" tabindex="-1"></a>pronostico_7d <span class="ot">&lt;-</span> forecast<span class="sc">::</span><span class="fu">forecast</span>(modelo_auto, <span class="at">h =</span> h)</span>
+<span id="cb170-10"><a href="Modelos_estacionarios_1.html#cb170-10" tabindex="-1"></a></span>
+<span id="cb170-11"><a href="Modelos_estacionarios_1.html#cb170-11" tabindex="-1"></a><span class="co"># 3. Últimos 21 días observados</span></span>
+<span id="cb170-12"><a href="Modelos_estacionarios_1.html#cb170-12" tabindex="-1"></a>datos_zoom21 <span class="ot">&lt;-</span> <span class="fu">tail</span>(datos, n_obs_hist)</span>
+<span id="cb170-13"><a href="Modelos_estacionarios_1.html#cb170-13" tabindex="-1"></a></span>
+<span id="cb170-14"><a href="Modelos_estacionarios_1.html#cb170-14" tabindex="-1"></a><span class="co"># 4. Fechas para el pronóstico (continuando la última fecha observada)</span></span>
+<span id="cb170-15"><a href="Modelos_estacionarios_1.html#cb170-15" tabindex="-1"></a>ultima_fecha <span class="ot">&lt;-</span> <span class="fu">max</span>(datos<span class="sc">$</span>fecha, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb170-16"><a href="Modelos_estacionarios_1.html#cb170-16" tabindex="-1"></a>fechas_forecast <span class="ot">&lt;-</span> ultima_fecha <span class="sc">+</span> lubridate<span class="sc">::</span><span class="fu">hours</span>(<span class="dv">1</span><span class="sc">:</span>h)</span>
+<span id="cb170-17"><a href="Modelos_estacionarios_1.html#cb170-17" tabindex="-1"></a></span>
+<span id="cb170-18"><a href="Modelos_estacionarios_1.html#cb170-18" tabindex="-1"></a><span class="co"># 5. Data frame del pronóstico con IC</span></span>
+<span id="cb170-19"><a href="Modelos_estacionarios_1.html#cb170-19" tabindex="-1"></a>df_forecast <span class="ot">&lt;-</span> tibble<span class="sc">::</span><span class="fu">tibble</span>(</span>
+<span id="cb170-20"><a href="Modelos_estacionarios_1.html#cb170-20" tabindex="-1"></a>  <span class="at">fecha    =</span> fechas_forecast,</span>
+<span id="cb170-21"><a href="Modelos_estacionarios_1.html#cb170-21" tabindex="-1"></a>  <span class="at">media    =</span> <span class="fu">as.numeric</span>(pronostico_7d<span class="sc">$</span>mean),</span>
+<span id="cb170-22"><a href="Modelos_estacionarios_1.html#cb170-22" tabindex="-1"></a>  <span class="at">lower80  =</span> <span class="fu">as.numeric</span>(pronostico_7d<span class="sc">$</span>lower[,<span class="st">&quot;80%&quot;</span>]),</span>
+<span id="cb170-23"><a href="Modelos_estacionarios_1.html#cb170-23" tabindex="-1"></a>  <span class="at">upper80  =</span> <span class="fu">as.numeric</span>(pronostico_7d<span class="sc">$</span>upper[,<span class="st">&quot;80%&quot;</span>]),</span>
+<span id="cb170-24"><a href="Modelos_estacionarios_1.html#cb170-24" tabindex="-1"></a>  <span class="at">lower95  =</span> <span class="fu">as.numeric</span>(pronostico_7d<span class="sc">$</span>lower[,<span class="st">&quot;95%&quot;</span>]),</span>
+<span id="cb170-25"><a href="Modelos_estacionarios_1.html#cb170-25" tabindex="-1"></a>  <span class="at">upper95  =</span> <span class="fu">as.numeric</span>(pronostico_7d<span class="sc">$</span>upper[,<span class="st">&quot;95%&quot;</span>])</span>
+<span id="cb170-26"><a href="Modelos_estacionarios_1.html#cb170-26" tabindex="-1"></a>)</span>
+<span id="cb170-27"><a href="Modelos_estacionarios_1.html#cb170-27" tabindex="-1"></a></span>
+<span id="cb170-28"><a href="Modelos_estacionarios_1.html#cb170-28" tabindex="-1"></a><span class="co"># 6. Data frame histórico</span></span>
+<span id="cb170-29"><a href="Modelos_estacionarios_1.html#cb170-29" tabindex="-1"></a>df_hist <span class="ot">&lt;-</span> tibble<span class="sc">::</span><span class="fu">tibble</span>(</span>
+<span id="cb170-30"><a href="Modelos_estacionarios_1.html#cb170-30" tabindex="-1"></a>  <span class="at">fecha =</span> datos_zoom21<span class="sc">$</span>fecha,</span>
+<span id="cb170-31"><a href="Modelos_estacionarios_1.html#cb170-31" tabindex="-1"></a>  <span class="at">valor =</span> datos_zoom21<span class="sc">$</span>valor_imputado</span>
+<span id="cb170-32"><a href="Modelos_estacionarios_1.html#cb170-32" tabindex="-1"></a>)</span>
+<span id="cb170-33"><a href="Modelos_estacionarios_1.html#cb170-33" tabindex="-1"></a></span>
+<span id="cb170-34"><a href="Modelos_estacionarios_1.html#cb170-34" tabindex="-1"></a><span class="co"># 7. Gráfico</span></span>
+<span id="cb170-35"><a href="Modelos_estacionarios_1.html#cb170-35" tabindex="-1"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb170-36"><a href="Modelos_estacionarios_1.html#cb170-36" tabindex="-1"></a>  <span class="co"># franjas 95%</span></span>
+<span id="cb170-37"><a href="Modelos_estacionarios_1.html#cb170-37" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_ribbon</span>(</span>
+<span id="cb170-38"><a href="Modelos_estacionarios_1.html#cb170-38" tabindex="-1"></a>    <span class="at">data =</span> df_forecast,</span>
+<span id="cb170-39"><a href="Modelos_estacionarios_1.html#cb170-39" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">x =</span> fecha, <span class="at">ymin =</span> lower95, <span class="at">ymax =</span> upper95),</span>
+<span id="cb170-40"><a href="Modelos_estacionarios_1.html#cb170-40" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">&quot;grey80&quot;</span>,</span>
+<span id="cb170-41"><a href="Modelos_estacionarios_1.html#cb170-41" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.5</span></span>
+<span id="cb170-42"><a href="Modelos_estacionarios_1.html#cb170-42" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb170-43"><a href="Modelos_estacionarios_1.html#cb170-43" tabindex="-1"></a>  <span class="co"># franjas 80%</span></span>
+<span id="cb170-44"><a href="Modelos_estacionarios_1.html#cb170-44" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_ribbon</span>(</span>
+<span id="cb170-45"><a href="Modelos_estacionarios_1.html#cb170-45" tabindex="-1"></a>    <span class="at">data =</span> df_forecast,</span>
+<span id="cb170-46"><a href="Modelos_estacionarios_1.html#cb170-46" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">x =</span> fecha, <span class="at">ymin =</span> lower80, <span class="at">ymax =</span> upper80),</span>
+<span id="cb170-47"><a href="Modelos_estacionarios_1.html#cb170-47" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">&quot;grey60&quot;</span>,</span>
+<span id="cb170-48"><a href="Modelos_estacionarios_1.html#cb170-48" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.5</span></span>
+<span id="cb170-49"><a href="Modelos_estacionarios_1.html#cb170-49" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb170-50"><a href="Modelos_estacionarios_1.html#cb170-50" tabindex="-1"></a>  <span class="co"># serie observada 21 días</span></span>
+<span id="cb170-51"><a href="Modelos_estacionarios_1.html#cb170-51" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_line</span>(</span>
+<span id="cb170-52"><a href="Modelos_estacionarios_1.html#cb170-52" tabindex="-1"></a>    <span class="at">data =</span> df_hist,</span>
+<span id="cb170-53"><a href="Modelos_estacionarios_1.html#cb170-53" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">x =</span> fecha, <span class="at">y =</span> valor),</span>
+<span id="cb170-54"><a href="Modelos_estacionarios_1.html#cb170-54" tabindex="-1"></a>    <span class="at">linewidth =</span> <span class="fl">0.6</span>,</span>
+<span id="cb170-55"><a href="Modelos_estacionarios_1.html#cb170-55" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">&quot;black&quot;</span></span>
+<span id="cb170-56"><a href="Modelos_estacionarios_1.html#cb170-56" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb170-57"><a href="Modelos_estacionarios_1.html#cb170-57" tabindex="-1"></a>  <span class="co"># media pronosticada</span></span>
+<span id="cb170-58"><a href="Modelos_estacionarios_1.html#cb170-58" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_line</span>(</span>
+<span id="cb170-59"><a href="Modelos_estacionarios_1.html#cb170-59" tabindex="-1"></a>    <span class="at">data =</span> df_forecast,</span>
+<span id="cb170-60"><a href="Modelos_estacionarios_1.html#cb170-60" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">x =</span> fecha, <span class="at">y =</span> media),</span>
+<span id="cb170-61"><a href="Modelos_estacionarios_1.html#cb170-61" tabindex="-1"></a>    <span class="at">linewidth =</span> <span class="fl">0.7</span>,</span>
+<span id="cb170-62"><a href="Modelos_estacionarios_1.html#cb170-62" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">&quot;red&quot;</span></span>
+<span id="cb170-63"><a href="Modelos_estacionarios_1.html#cb170-63" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb170-64"><a href="Modelos_estacionarios_1.html#cb170-64" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(</span>
+<span id="cb170-65"><a href="Modelos_estacionarios_1.html#cb170-65" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;Últimos 21 días + 7 días pronosticados (con intervalos)&quot;</span>,</span>
+<span id="cb170-66"><a href="Modelos_estacionarios_1.html#cb170-66" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;Fecha-hora&quot;</span>,</span>
+<span id="cb170-67"><a href="Modelos_estacionarios_1.html#cb170-67" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;Valor&quot;</span></span>
+<span id="cb170-68"><a href="Modelos_estacionarios_1.html#cb170-68" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb170-69"><a href="Modelos_estacionarios_1.html#cb170-69" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">theme_minimal</span>()</span></code></pre></div>
+<p><img src="propuesta-pronostico-subestacion_files/figure-html/zoom-21-dias-mas-7-pronostico11-1.png" width="960" /></p>
+</div>
+<div id="zoom-últimos-6-meses-3-meses-de-pronóstico" class="section level3 hasAnchor" number="6.10.3">
+<h3><span class="header-section-number">6.10.3</span> Zoom: últimos 6 meses + 3 meses de pronóstico<a href="Modelos_estacionarios_1.html#zoom-%C3%BAltimos-6-meses-3-meses-de-pron%C3%B3stico" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb171"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb171-1"><a href="Modelos_estacionarios_1.html#cb171-1" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
+<span id="cb171-2"><a href="Modelos_estacionarios_1.html#cb171-2" tabindex="-1"></a></span>
+<span id="cb171-3"><a href="Modelos_estacionarios_1.html#cb171-3" tabindex="-1"></a><span class="co"># 1. última fecha del dataset</span></span>
+<span id="cb171-4"><a href="Modelos_estacionarios_1.html#cb171-4" tabindex="-1"></a>ultima_fecha <span class="ot">&lt;-</span> <span class="fu">max</span>(datos<span class="sc">$</span>fecha, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb171-5"><a href="Modelos_estacionarios_1.html#cb171-5" tabindex="-1"></a></span>
+<span id="cb171-6"><a href="Modelos_estacionarios_1.html#cb171-6" tabindex="-1"></a><span class="co"># 2. fecha de corte para los últimos 6 meses</span></span>
+<span id="cb171-7"><a href="Modelos_estacionarios_1.html#cb171-7" tabindex="-1"></a>fecha_corte_6m <span class="ot">&lt;-</span> ultima_fecha <span class="sc">%m-%</span> <span class="fu">months</span>(<span class="dv">6</span>)</span>
+<span id="cb171-8"><a href="Modelos_estacionarios_1.html#cb171-8" tabindex="-1"></a></span>
+<span id="cb171-9"><a href="Modelos_estacionarios_1.html#cb171-9" tabindex="-1"></a><span class="co"># 3. filtrar últimos 6 meses de datos observados</span></span>
+<span id="cb171-10"><a href="Modelos_estacionarios_1.html#cb171-10" tabindex="-1"></a>datos_6m <span class="ot">&lt;-</span> datos <span class="sc">%&gt;%</span></span>
+<span id="cb171-11"><a href="Modelos_estacionarios_1.html#cb171-11" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(fecha <span class="sc">&gt;=</span> fecha_corte_6m) <span class="sc">%&gt;%</span></span>
+<span id="cb171-12"><a href="Modelos_estacionarios_1.html#cb171-12" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(fecha)</span>
+<span id="cb171-13"><a href="Modelos_estacionarios_1.html#cb171-13" tabindex="-1"></a></span>
+<span id="cb171-14"><a href="Modelos_estacionarios_1.html#cb171-14" tabindex="-1"></a><span class="co"># 4. definir horizonte de 3 meses por horas</span></span>
+<span id="cb171-15"><a href="Modelos_estacionarios_1.html#cb171-15" tabindex="-1"></a>fecha_fin_forecast <span class="ot">&lt;-</span> ultima_fecha <span class="sc">%m+%</span> <span class="fu">months</span>(<span class="dv">3</span>)</span>
+<span id="cb171-16"><a href="Modelos_estacionarios_1.html#cb171-16" tabindex="-1"></a><span class="co"># diferencia en horas entre última fecha y última + 3 meses</span></span>
+<span id="cb171-17"><a href="Modelos_estacionarios_1.html#cb171-17" tabindex="-1"></a>h <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">difftime</span>(fecha_fin_forecast, ultima_fecha, <span class="at">units =</span> <span class="st">&quot;hours&quot;</span>))</span>
+<span id="cb171-18"><a href="Modelos_estacionarios_1.html#cb171-18" tabindex="-1"></a></span>
+<span id="cb171-19"><a href="Modelos_estacionarios_1.html#cb171-19" tabindex="-1"></a><span class="co"># por seguridad, si h es 0 (fechas raras), ponemos un mínimo</span></span>
+<span id="cb171-20"><a href="Modelos_estacionarios_1.html#cb171-20" tabindex="-1"></a><span class="cf">if</span> (h <span class="sc">&lt;</span> <span class="dv">1</span>) h <span class="ot">&lt;-</span> <span class="dv">24</span></span>
+<span id="cb171-21"><a href="Modelos_estacionarios_1.html#cb171-21" tabindex="-1"></a></span>
+<span id="cb171-22"><a href="Modelos_estacionarios_1.html#cb171-22" tabindex="-1"></a><span class="co"># 5. pronóstico a 3 meses (en horas)</span></span>
+<span id="cb171-23"><a href="Modelos_estacionarios_1.html#cb171-23" tabindex="-1"></a>pronostico_3m <span class="ot">&lt;-</span> forecast<span class="sc">::</span><span class="fu">forecast</span>(modelo_auto, <span class="at">h =</span> h)</span>
+<span id="cb171-24"><a href="Modelos_estacionarios_1.html#cb171-24" tabindex="-1"></a></span>
+<span id="cb171-25"><a href="Modelos_estacionarios_1.html#cb171-25" tabindex="-1"></a><span class="co"># 6. construir data frame de fechas futuras</span></span>
+<span id="cb171-26"><a href="Modelos_estacionarios_1.html#cb171-26" tabindex="-1"></a>fechas_forecast <span class="ot">&lt;-</span> ultima_fecha <span class="sc">+</span> <span class="fu">hours</span>(<span class="dv">1</span><span class="sc">:</span>h)</span>
+<span id="cb171-27"><a href="Modelos_estacionarios_1.html#cb171-27" tabindex="-1"></a></span>
+<span id="cb171-28"><a href="Modelos_estacionarios_1.html#cb171-28" tabindex="-1"></a>df_forecast <span class="ot">&lt;-</span> tibble<span class="sc">::</span><span class="fu">tibble</span>(</span>
+<span id="cb171-29"><a href="Modelos_estacionarios_1.html#cb171-29" tabindex="-1"></a>  <span class="at">fecha    =</span> fechas_forecast,</span>
+<span id="cb171-30"><a href="Modelos_estacionarios_1.html#cb171-30" tabindex="-1"></a>  <span class="at">media    =</span> <span class="fu">as.numeric</span>(pronostico_3m<span class="sc">$</span>mean),</span>
+<span id="cb171-31"><a href="Modelos_estacionarios_1.html#cb171-31" tabindex="-1"></a>  <span class="at">lower80  =</span> <span class="fu">as.numeric</span>(pronostico_3m<span class="sc">$</span>lower[,<span class="st">&quot;80%&quot;</span>]),</span>
+<span id="cb171-32"><a href="Modelos_estacionarios_1.html#cb171-32" tabindex="-1"></a>  <span class="at">upper80  =</span> <span class="fu">as.numeric</span>(pronostico_3m<span class="sc">$</span>upper[,<span class="st">&quot;80%&quot;</span>]),</span>
+<span id="cb171-33"><a href="Modelos_estacionarios_1.html#cb171-33" tabindex="-1"></a>  <span class="at">lower95  =</span> <span class="fu">as.numeric</span>(pronostico_3m<span class="sc">$</span>lower[,<span class="st">&quot;95%&quot;</span>]),</span>
+<span id="cb171-34"><a href="Modelos_estacionarios_1.html#cb171-34" tabindex="-1"></a>  <span class="at">upper95  =</span> <span class="fu">as.numeric</span>(pronostico_3m<span class="sc">$</span>upper[,<span class="st">&quot;95%&quot;</span>])</span>
+<span id="cb171-35"><a href="Modelos_estacionarios_1.html#cb171-35" tabindex="-1"></a>)</span>
+<span id="cb171-36"><a href="Modelos_estacionarios_1.html#cb171-36" tabindex="-1"></a></span>
+<span id="cb171-37"><a href="Modelos_estacionarios_1.html#cb171-37" tabindex="-1"></a><span class="co"># 7. data frame histórico (6 meses)</span></span>
+<span id="cb171-38"><a href="Modelos_estacionarios_1.html#cb171-38" tabindex="-1"></a>df_hist <span class="ot">&lt;-</span> tibble<span class="sc">::</span><span class="fu">tibble</span>(</span>
+<span id="cb171-39"><a href="Modelos_estacionarios_1.html#cb171-39" tabindex="-1"></a>  <span class="at">fecha =</span> datos_6m<span class="sc">$</span>fecha,</span>
+<span id="cb171-40"><a href="Modelos_estacionarios_1.html#cb171-40" tabindex="-1"></a>  <span class="at">valor =</span> datos_6m<span class="sc">$</span>valor_imputado</span>
+<span id="cb171-41"><a href="Modelos_estacionarios_1.html#cb171-41" tabindex="-1"></a>)</span>
+<span id="cb171-42"><a href="Modelos_estacionarios_1.html#cb171-42" tabindex="-1"></a></span>
+<span id="cb171-43"><a href="Modelos_estacionarios_1.html#cb171-43" tabindex="-1"></a><span class="co"># 8. gráfico</span></span>
+<span id="cb171-44"><a href="Modelos_estacionarios_1.html#cb171-44" tabindex="-1"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb171-45"><a href="Modelos_estacionarios_1.html#cb171-45" tabindex="-1"></a>  <span class="co"># bandas 95 %</span></span>
+<span id="cb171-46"><a href="Modelos_estacionarios_1.html#cb171-46" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_ribbon</span>(</span>
+<span id="cb171-47"><a href="Modelos_estacionarios_1.html#cb171-47" tabindex="-1"></a>    <span class="at">data =</span> df_forecast,</span>
+<span id="cb171-48"><a href="Modelos_estacionarios_1.html#cb171-48" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">x =</span> fecha, <span class="at">ymin =</span> lower95, <span class="at">ymax =</span> upper95),</span>
+<span id="cb171-49"><a href="Modelos_estacionarios_1.html#cb171-49" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">&quot;grey85&quot;</span>,</span>
+<span id="cb171-50"><a href="Modelos_estacionarios_1.html#cb171-50" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.5</span></span>
+<span id="cb171-51"><a href="Modelos_estacionarios_1.html#cb171-51" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb171-52"><a href="Modelos_estacionarios_1.html#cb171-52" tabindex="-1"></a>  <span class="co"># bandas 80 %</span></span>
+<span id="cb171-53"><a href="Modelos_estacionarios_1.html#cb171-53" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_ribbon</span>(</span>
+<span id="cb171-54"><a href="Modelos_estacionarios_1.html#cb171-54" tabindex="-1"></a>    <span class="at">data =</span> df_forecast,</span>
+<span id="cb171-55"><a href="Modelos_estacionarios_1.html#cb171-55" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">x =</span> fecha, <span class="at">ymin =</span> lower80, <span class="at">ymax =</span> upper80),</span>
+<span id="cb171-56"><a href="Modelos_estacionarios_1.html#cb171-56" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">&quot;grey65&quot;</span>,</span>
+<span id="cb171-57"><a href="Modelos_estacionarios_1.html#cb171-57" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.5</span></span>
+<span id="cb171-58"><a href="Modelos_estacionarios_1.html#cb171-58" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb171-59"><a href="Modelos_estacionarios_1.html#cb171-59" tabindex="-1"></a>  <span class="co"># serie observada 6 meses</span></span>
+<span id="cb171-60"><a href="Modelos_estacionarios_1.html#cb171-60" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_line</span>(</span>
+<span id="cb171-61"><a href="Modelos_estacionarios_1.html#cb171-61" tabindex="-1"></a>    <span class="at">data =</span> df_hist,</span>
+<span id="cb171-62"><a href="Modelos_estacionarios_1.html#cb171-62" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">x =</span> fecha, <span class="at">y =</span> valor),</span>
+<span id="cb171-63"><a href="Modelos_estacionarios_1.html#cb171-63" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">&quot;black&quot;</span>,</span>
+<span id="cb171-64"><a href="Modelos_estacionarios_1.html#cb171-64" tabindex="-1"></a>    <span class="at">linewidth =</span> <span class="fl">0.5</span></span>
+<span id="cb171-65"><a href="Modelos_estacionarios_1.html#cb171-65" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb171-66"><a href="Modelos_estacionarios_1.html#cb171-66" tabindex="-1"></a>  <span class="co"># media pronosticada 3 meses</span></span>
+<span id="cb171-67"><a href="Modelos_estacionarios_1.html#cb171-67" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_line</span>(</span>
+<span id="cb171-68"><a href="Modelos_estacionarios_1.html#cb171-68" tabindex="-1"></a>    <span class="at">data =</span> df_forecast,</span>
+<span id="cb171-69"><a href="Modelos_estacionarios_1.html#cb171-69" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">x =</span> fecha, <span class="at">y =</span> media),</span>
+<span id="cb171-70"><a href="Modelos_estacionarios_1.html#cb171-70" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">&quot;red&quot;</span>,</span>
+<span id="cb171-71"><a href="Modelos_estacionarios_1.html#cb171-71" tabindex="-1"></a>    <span class="at">linewidth =</span> <span class="fl">0.6</span></span>
+<span id="cb171-72"><a href="Modelos_estacionarios_1.html#cb171-72" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb171-73"><a href="Modelos_estacionarios_1.html#cb171-73" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">labs</span>(</span>
+<span id="cb171-74"><a href="Modelos_estacionarios_1.html#cb171-74" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;Últimos 6 meses + 3 meses de pronóstico (con intervalos)&quot;</span>,</span>
+<span id="cb171-75"><a href="Modelos_estacionarios_1.html#cb171-75" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;Fecha-hora&quot;</span>,</span>
+<span id="cb171-76"><a href="Modelos_estacionarios_1.html#cb171-76" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;Valor&quot;</span></span>
+<span id="cb171-77"><a href="Modelos_estacionarios_1.html#cb171-77" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb171-78"><a href="Modelos_estacionarios_1.html#cb171-78" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">theme_minimal</span>()</span></code></pre></div>
+<p><img src="propuesta-pronostico-subestacion_files/figure-html/zoom-6-meses-mas-3-pronostico11-1.png" width="960" /></p>
+<ul>
+<li><p>La línea negra (comportamiento observado de la serie) muestra un comportamiento cíclico con picos y valles marcados: aumento durante ciertas horas del día y disminución en otras, consistente con el patrón diario.</p></li>
+<li><p>La línea roja (pronóstico) proyecta este patrón manteniendo la forma estacional del ciclo, con una amplitud y nivel similares al histórico reciente. No se observan rupturas bruscas: el modelo continúa la dinámica natural del sistema eléctrico.</p></li>
+<li><p>Las bandas grises representan los intervalos de confianza (80% y 95%). Son estrechas en el corto plazo, lo que indica alta confianza en los pronósticos inmediatos, pero se amplían gradualmente a medida que aumenta el horizonte temporal.</p></li>
+<li><p>El modelo reproduce adecuadamente la variación intradiaria (24 horas) observada en los días anteriores. Las predicciones son coherentes con la secuencia de consumo reciente y reflejan la persistencia estacional identificada por la ACF/PACF.</p></li>
+<li><p>El modelo tiene buena capacidad predictiva a corto plazo (1–7 días), manteniendo la coherencia con el patrón estacional. Los intervalos de confianza se ensanchan progresivamente, reflejando la incertidumbre natural del pronóstico a mayor plazo.</p></li>
+<li><p>En el mediano plazo, el modelo predice una continuidad del patrón histórico, sin cambios estructurales, pero con incertidumbre creciente. Esto es esperable y refleja la naturaleza de los modelos ARIMA: confiables a corto y mediano plazo, pero menos precisos en horizontes largos.</p></li>
+</ul>
+</div>
+</div>
+<div id="conclusiones-2" class="section level2 hasAnchor" number="6.11">
+<h2><span class="header-section-number">6.11</span> Conclusiones<a href="Modelos_estacionarios_1.html#conclusiones-2" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<pre><code>## El diagnóstico de residuos del modelo ARIMA(3,0,0)(2,1,0)[24] muestra que la mayoría de los errores se distribuyen alrededor de cero y con varianza estable, lo cual evidencia un ajuste razonable. 
+## No obstante, los picos extremos y el resultado significativo de la prueba de Ljung–Box (p &lt; 0.05) indican que los residuos aún presentan autocorrelación, especialmente en múltiplos del periodo estacional (24 horas). 
+## Esto sugiere que el modelo no explica completamente la dinámica diaria de la serie, por lo que podrían probarse variantes con términos adicionales de media móvil o componentes estacionales para mejorar la independencia de los residuos.
+## 
+## El modelo ARIMA(3,0,0)(2,1,0)[24] genera pronósticos coherentes y estacionalmente consistentes con el comportamiento de la serie tiempo de la potencia eléctrica.
+## Captura correctamente los ciclos horarios diarios y mantiene la estabilidad en el nivel medio.
+## A corto plazo (1–7 días), los pronósticos son confiables y con baja incertidumbre, mientras que a largo plazo (3 meses), el modelo ofrece una proyección conservadora, con intervalos más amplios que reflejan la naturaleza probabilística del proceso.
+## 
+## En nuestra serie de tiempo con estacionalidad diaria (s=24), se considera:
+## - Corto plazo: entre 24 y 168 horas (1 a 7 días).
+## - Mediano plazo: entre 1 semana y 3 meses.
+## - Largo plazo: más de 3 meses.
+## En el presente análisis, los pronósticos de 1 y 7 días se interpretan como proyecciones de corto plazo con alta fiabilidad, mientras que los pronósticos a 3 meses constituyen una proyección de mediano a largo plazo, útil para identificar tendencias y variabilidad global, aunque con mayor incertidumbre.</code></pre>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="Modelización.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+  "sharing": false,
+  "fontsettings": {
+    "theme": "white",
+    "family": "sans",
+    "size": 2
+  },
+  "edit": {
+    "link": null,
+    "text": null
+  },
+  "history": {
+    "link": null,
+    "text": null
+  },
+  "view": {
+    "link": null,
+    "text": null
+  },
+  "download": ["propuesta-pronostico-subestacion.pdf", "propuesta-pronostico-subestacion.epub"],
+  "search": {
+    "engine": "fuse",
+    "options": null
+  },
+  "toc": {
+    "collapse": "subsection",
+    "toc_depth": 2
+  }
+});
+});
+</script>
+
+</body>
+
+</html>
