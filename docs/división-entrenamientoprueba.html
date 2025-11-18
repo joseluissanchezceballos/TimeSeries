@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>14 7. División entrenamiento–prueba | Propuesta de serie de tiempo: Predicción de demanda eléctrica a corto plazo</title>
+  <meta name="description" content="14 7. División entrenamiento–prueba | Propuesta de serie de tiempo: Predicción de demanda eléctrica a corto plazo" />
+  <meta name="generator" content="bookdown 0.45 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="14 7. División entrenamiento–prueba | Propuesta de serie de tiempo: Predicción de demanda eléctrica a corto plazo" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="14 7. División entrenamiento–prueba | Propuesta de serie de tiempo: Predicción de demanda eléctrica a corto plazo" />
+  
+  
+  
+
+<meta name="author" content="Fredy A. Ordoñez · Oscar F. Velásquez · José L. Sánchez" />
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="exploración-inicial-de-la-serie.html"/>
+<link rel="next" href="ajuste-de-modelos-arima-ets-y-prophet.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<link href="libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet" />
+<script src="libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<script src="libs/plotly-binding-4.11.0/plotly.js"></script>
+<script src="libs/typedarray-0.1/typedarray.min.js"></script>
+<link href="libs/crosstalk-1.2.2/css/crosstalk.min.css" rel="stylesheet" />
+<script src="libs/crosstalk-1.2.2/js/crosstalk.min.js"></script>
+<link href="libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
+
+
+<style type="text/css">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Presentación del Bookdown</a></li>
+<li class="chapter" data-level="2" data-path="propuesta.html"><a href="propuesta.html"><i class="fa fa-check"></i><b>2</b> Propuesta de serie de tiempo: Predicción de demanda eléctrica a corto plazo</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="propuesta.html"><a href="propuesta.html#qu%C3%A9-voy-a-pronosticar"><i class="fa fa-check"></i><b>2.1</b> ¿Qué voy a pronosticar?</a></li>
+<li class="chapter" data-level="2.2" data-path="propuesta.html"><a href="propuesta.html#por-qu%C3%A9-es-importante"><i class="fa fa-check"></i><b>2.2</b> ¿Por qué es importante?</a></li>
+<li class="chapter" data-level="2.3" data-path="propuesta.html"><a href="propuesta.html#fuente-de-datos-y-permisos"><i class="fa fa-check"></i><b>2.3</b> Fuente de datos y permisos</a></li>
+<li class="chapter" data-level="2.4" data-path="propuesta.html"><a href="propuesta.html#impacto-esperado"><i class="fa fa-check"></i><b>2.4</b> Impacto esperado</a></li>
+<li class="chapter" data-level="2.5" data-path="propuesta.html"><a href="propuesta.html#referencias"><i class="fa fa-check"></i><b>2.5</b> Referencias</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><i class="fa fa-check"></i><b>3</b> Análisis de Serie de Tiempo: Potencia Eléctrica Horaria</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#contexto-y-objetivos"><i class="fa fa-check"></i><b>3.1</b> Contexto y objetivos</a></li>
+<li class="chapter" data-level="3.2" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#cargue-de-librer%C3%ADas"><i class="fa fa-check"></i><b>3.2</b> Cargue de Librerías</a></li>
+<li class="chapter" data-level="3.3" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#lectura-y-preparaci%C3%B3n-de-los-datos"><i class="fa fa-check"></i><b>3.3</b> Lectura y preparación de los datos</a></li>
+<li class="chapter" data-level="3.4" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#funciones-auxiliares-de-visualizaci%C3%B3n-de-la-serie-de-tiempo"><i class="fa fa-check"></i><b>3.4</b> Funciones auxiliares de visualización de la serie de tiempo</a></li>
+<li class="chapter" data-level="3.5" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#vista-general-del-comportamiento-de-la-potencia-el%C3%A9ctrica-por-escalas-diaria-semanal-mensual-anual"><i class="fa fa-check"></i><b>3.5</b> Vista general del comportamiento de la potencia eléctrica por escalas (diaria, semanal, mensual, anual)</a></li>
+<li class="chapter" data-level="3.6" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#curvas-de-potencia-el%C3%A9ctrica-por-periodo-d%C3%ADa-semana-mes-a%C3%B1o"><i class="fa fa-check"></i><b>3.6</b> Curvas de potencia eléctrica por periodo (día, semana, mes, año)</a></li>
+<li class="chapter" data-level="3.7" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#promedios-m%C3%B3viles"><i class="fa fa-check"></i><b>3.7</b> Promedios móviles</a></li>
+<li class="chapter" data-level="3.8" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#rezagos-lags-y-autocorrelaci%C3%B3n"><i class="fa fa-check"></i><b>3.8</b> Rezagos (lags) y autocorrelación</a></li>
+<li class="chapter" data-level="3.9" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#estacionalidad-gr%C3%A1ficos-y-descomposici%C3%B3n"><i class="fa fa-check"></i><b>3.9</b> Estacionalidad (gráficos y descomposición)</a></li>
+<li class="chapter" data-level="3.10" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#indicadores-resumidos"><i class="fa fa-check"></i><b>3.10</b> Indicadores resumidos</a></li>
+<li class="chapter" data-level="3.11" data-path="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html"><a href="análisis-de-serie-de-tiempo-potencia-eléctrica-horaria.html#conclusiones"><i class="fa fa-check"></i><b>3.11</b> Conclusiones</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html"><i class="fa fa-check"></i><b>4</b> Preprocesamiento y visualización - Estacionariedad, ACF/PACF, STL, ARIMA, Puntos de cambio y Pronóstico</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#resumen"><i class="fa fa-check"></i><b>4.1</b> Resumen</a></li>
+<li class="chapter" data-level="4.2" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#carga-de-librer%C3%ADas"><i class="fa fa-check"></i><b>4.2</b> Carga de librerías</a></li>
+<li class="chapter" data-level="4.3" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#carga-de-datos-y-visualizaci%C3%B3n"><i class="fa fa-check"></i><b>4.3</b> Carga de datos y visualización</a>
+<ul>
+<li class="chapter" data-level="4.3.1" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#bandas-para-huecos-na-y-vistas-multiescala"><i class="fa fa-check"></i><b>4.3.1</b> Bandas para huecos (NA) y vistas multiescala</a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#estacionariedad-prueba-adf-augmented-dickey-fuller-test-y-diferenciaci%C3%B3n"><i class="fa fa-check"></i><b>4.4</b> Estacionariedad: prueba ADF (Augmented Dickey-Fuller Test) y diferenciación</a></li>
+<li class="chapter" data-level="4.5" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#acf-y-pacf-original-y-diferenciada"><i class="fa fa-check"></i><b>4.5</b> ACF y PACF (original y diferenciada)</a></li>
+<li class="chapter" data-level="4.6" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#descomposici%C3%B3n-stl-seasonal-trend-decomposition-using-loess-y-mstl-multiple-seasonal-trend-decomposition-using-loess"><i class="fa fa-check"></i><b>4.6</b> Descomposición STL (Seasonal-Trend decomposition using Loess) y MSTL (Multiple Seasonal-Trend decomposition using Loess)</a>
+<ul>
+<li class="chapter" data-level="4.6.1" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#descomposici%C3%B3n-de-la-serie-por-estacionalidades"><i class="fa fa-check"></i><b>4.6.1</b> Descomposición de la serie por estacionalidades</a></li>
+<li class="chapter" data-level="4.6.2" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#descomposici%C3%B3n-de-la-serie-en-una-ventana-de-4-semanas"><i class="fa fa-check"></i><b>4.6.2</b> Descomposición de la serie en una ventana de 4 semanas</a></li>
+</ul></li>
+<li class="chapter" data-level="4.7" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#selecci%C3%B3n-del-modelo-eficiente-auto.arima-y-pron%C3%B3stico"><i class="fa fa-check"></i><b>4.7</b> Selección del modelo eficiente (auto.arima) y Pronóstico</a>
+<ul>
+<li class="chapter" data-level="4.7.1" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#zoom-al-pron%C3%B3stico"><i class="fa fa-check"></i><b>4.7.1</b> Zoom al Pronóstico</a></li>
+</ul></li>
+<li class="chapter" data-level="4.8" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#puntos-de-cambio-y-visualizaci%C3%B3n"><i class="fa fa-check"></i><b>4.8</b> Puntos de cambio y visualización</a></li>
+<li class="chapter" data-level="4.9" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#outliers-y-verificaci%C3%B3n-de-supuestos-del-arima"><i class="fa fa-check"></i><b>4.9</b> Outliers y verificación de supuestos del ARIMA</a>
+<ul>
+<li class="chapter" data-level="4.9.1" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#qq-plot-de-los-residuos-del-modelo-arima"><i class="fa fa-check"></i><b>4.9.1</b> Q–Q Plot de los residuos del modelo ARIMA</a></li>
+</ul></li>
+<li class="chapter" data-level="4.10" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#transformaci%C3%B3n-logar%C3%ADtmica-para-estabilizar-la-varianza"><i class="fa fa-check"></i><b>4.10</b> Transformación logarítmica para estabilizar la varianza</a></li>
+<li class="chapter" data-level="4.11" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#ajuste-del-modelo-arima-en-escala-logar%C3%ADtmica"><i class="fa fa-check"></i><b>4.11</b> Ajuste del modelo ARIMA en escala logarítmica</a></li>
+<li class="chapter" data-level="4.12" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#verificaci%C3%B3n-de-supuestos-del-nuevo-modelo"><i class="fa fa-check"></i><b>4.12</b> Verificación de supuestos del nuevo modelo</a></li>
+<li class="chapter" data-level="4.13" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#pron%C3%B3stico-con-el-modelo-mejorado-escala-logar%C3%ADtmica"><i class="fa fa-check"></i><b>4.13</b> Pronóstico con el modelo mejorado (escala logarítmica)</a>
+<ul>
+<li class="chapter" data-level="4.13.1" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#reconversi%C3%B3n-a-escala-original-exponencial-inversa"><i class="fa fa-check"></i><b>4.13.1</b> Reconversión a escala original (exponencial inversa)</a></li>
+</ul></li>
+<li class="chapter" data-level="4.14" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#conclusiones-1"><i class="fa fa-check"></i><b>4.14</b> Conclusiones</a>
+<ul>
+<li class="chapter" data-level="4.14.1" data-path="Preprocesamiento.html"><a href="Preprocesamiento.html#resumen-de-tiempos-de-ejecuci%C3%B3n-del-c%C3%B3digo"><i class="fa fa-check"></i><b>4.14.1</b> Resumen de tiempos de ejecución del código</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="Modelización.html"><a href="Modelización.html"><i class="fa fa-check"></i><b>5</b> Modelos de pronóstico - Metodología Holt – Winter</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="Modelización.html"><a href="Modelización.html#resumen-1"><i class="fa fa-check"></i><b>5.1</b> Resumen</a></li>
+<li class="chapter" data-level="5.2" data-path="Modelización.html"><a href="Modelización.html#cambio-de-la-serie-de-tiempo-a-circuito-de-potencia---preprocesamiento-y-visualizaci%C3%B3n"><i class="fa fa-check"></i><b>5.2</b> Cambio de la serie de tiempo a circuito de potencia - Preprocesamiento y visualización</a>
+<ul>
+<li class="chapter" data-level="5.2.1" data-path="Modelización.html"><a href="Modelización.html#carga-de-librer%C3%ADas-1"><i class="fa fa-check"></i><b>5.2.1</b> Carga de librerías</a></li>
+<li class="chapter" data-level="5.2.2" data-path="Modelización.html"><a href="Modelización.html#carga-de-datos-y-visualizaci%C3%B3n-1"><i class="fa fa-check"></i><b>5.2.2</b> Carga de datos y visualización</a></li>
+<li class="chapter" data-level="5.2.3" data-path="Modelización.html"><a href="Modelización.html#estacionariedad-prueba-adf-augmented-dickey-fuller-test-y-diferenciaci%C3%B3n-1"><i class="fa fa-check"></i><b>5.2.3</b> Estacionariedad: prueba ADF (Augmented Dickey-Fuller Test) y diferenciación</a></li>
+<li class="chapter" data-level="5.2.4" data-path="Modelización.html"><a href="Modelización.html#acf-y-pacf-original-y-diferenciada-1"><i class="fa fa-check"></i><b>5.2.4</b> ACF y PACF (original y diferenciada)</a></li>
+<li class="chapter" data-level="5.2.5" data-path="Modelización.html"><a href="Modelización.html#descomposici%C3%B3n-stl-seasonal-trend-decomposition-using-loess-y-mstl-multiple-seasonal-trend-decomposition-using-loess-1"><i class="fa fa-check"></i><b>5.2.5</b> Descomposición STL (Seasonal-Trend decomposition using Loess) y MSTL (Multiple Seasonal-Trend decomposition using Loess)</a></li>
+<li class="chapter" data-level="5.2.6" data-path="Modelización.html"><a href="Modelización.html#promedios-m%C3%B3viles-24h-168h-720h"><i class="fa fa-check"></i><b>5.2.6</b> Promedios móviles (24h, 168h, 720h)</a></li>
+<li class="chapter" data-level="5.2.7" data-path="Modelización.html"><a href="Modelización.html#selecci%C3%B3n-del-modelo-eficiente-auto.arima-y-pron%C3%B3stico-1"><i class="fa fa-check"></i><b>5.2.7</b> Selección del modelo eficiente (auto.arima) y Pronóstico</a></li>
+<li class="chapter" data-level="5.2.8" data-path="Modelización.html"><a href="Modelización.html#puntos-de-cambio-y-visualizaci%C3%B3n-1"><i class="fa fa-check"></i><b>5.2.8</b> Puntos de cambio y visualización</a></li>
+<li class="chapter" data-level="5.2.9" data-path="Modelización.html"><a href="Modelización.html#outliers-y-verificaci%C3%B3n-de-supuestos-del-arima-1"><i class="fa fa-check"></i><b>5.2.9</b> Outliers y verificación de supuestos del ARIMA</a></li>
+<li class="chapter" data-level="5.2.10" data-path="Modelización.html"><a href="Modelización.html#transformaci%C3%B3n-logar%C3%ADtmica-para-estabilizar-la-varianza-1"><i class="fa fa-check"></i><b>5.2.10</b> Transformación logarítmica para estabilizar la varianza</a></li>
+<li class="chapter" data-level="5.2.11" data-path="Modelización.html"><a href="Modelización.html#ajuste-del-modelo-arima-en-escala-logar%C3%ADtmica-1"><i class="fa fa-check"></i><b>5.2.11</b> Ajuste del modelo ARIMA en escala logarítmica</a></li>
+<li class="chapter" data-level="5.2.12" data-path="Modelización.html"><a href="Modelización.html#verificaci%C3%B3n-de-supuestos-del-nuevo-modelo-arima-en-escala-logar%C3%ADtmica"><i class="fa fa-check"></i><b>5.2.12</b> Verificación de supuestos del nuevo modelo ARIMA en escala logarítmica</a></li>
+<li class="chapter" data-level="5.2.13" data-path="Modelización.html"><a href="Modelización.html#pron%C3%B3stico-con-el-modelo-mejorado-escala-logar%C3%ADtmica-1"><i class="fa fa-check"></i><b>5.2.13</b> Pronóstico con el modelo mejorado (escala logarítmica)</a></li>
+</ul></li>
+<li class="chapter" data-level="5.3" data-path="Modelización.html"><a href="Modelización.html#preprocesamiento-de-la-serie-de-datos-para-holtwinters"><i class="fa fa-check"></i><b>5.3</b> Preprocesamiento de la serie de datos para Holt–Winters</a></li>
+<li class="chapter" data-level="5.4" data-path="Modelización.html"><a href="Modelización.html#divisi%C3%B3n-de-los-datos-entre-traintest"><i class="fa fa-check"></i><b>5.4</b> División de los datos entre TRAIN/TEST</a></li>
+<li class="chapter" data-level="5.5" data-path="Modelización.html"><a href="Modelización.html#ajuste-holtwinters-aditivo-y-multiplicativo-usando-train-y-h-definidos"><i class="fa fa-check"></i><b>5.5</b> Ajuste Holt–Winters aditivo y multiplicativo (usando TRAIN y h definidos)</a></li>
+<li class="chapter" data-level="5.6" data-path="Modelización.html"><a href="Modelización.html#gr%C3%A1fica-comparativa-traintest-pron%C3%B3sticos-hw-aditivo-vs.-multiplicativo"><i class="fa fa-check"></i><b>5.6</b> Gráfica comparativa: TRAIN/TEST + pronósticos HW (aditivo vs. multiplicativo)</a></li>
+<li class="chapter" data-level="5.7" data-path="Modelización.html"><a href="Modelización.html#evaluaci%C3%B3n-en-test-mape-y-rmse"><i class="fa fa-check"></i><b>5.7</b> Evaluación en TEST (MAPE y RMSE)</a></li>
+<li class="chapter" data-level="5.8" data-path="Modelización.html"><a href="Modelización.html#comparaci%C3%B3n-con-un-arima-simple"><i class="fa fa-check"></i><b>5.8</b> Comparación con un ARIMA simple</a></li>
+<li class="chapter" data-level="5.9" data-path="Modelización.html"><a href="Modelización.html#holt-winter-en-boxcox-ajuste-pron%C3%B3stico-en-bc-reconversi%C3%B3n-a-escala-original"><i class="fa fa-check"></i><b>5.9</b> Holt Winter en Box–Cox (ajuste + pronóstico en BC + reconversión a escala original)</a></li>
+<li class="chapter" data-level="5.10" data-path="Modelización.html"><a href="Modelización.html#gr%C3%A1fica-comparativa-traintest-en-original-hw-boxcox-reconvertido"><i class="fa fa-check"></i><b>5.10</b> Gráfica comparativa (TRAIN/TEST en original) + HW Box–Cox reconvertido</a></li>
+<li class="chapter" data-level="5.11" data-path="Modelización.html"><a href="Modelización.html#zoom-al-pron%C3%B3stico-holt-winter-boxcox-en-original"><i class="fa fa-check"></i><b>5.11</b> Zoom al pronóstico Holt Winter Box–Cox en original</a></li>
+<li class="chapter" data-level="5.12" data-path="Modelización.html"><a href="Modelización.html#m%C3%A9tricas-en-test-comparando-en-escala-original-holt-winter-y-boxcox"><i class="fa fa-check"></i><b>5.12</b> Métricas en TEST comparando en <strong>escala original</strong> (Holt Winter y Box–Cox)</a></li>
+<li class="chapter" data-level="5.13" data-path="Modelización.html"><a href="Modelización.html#resumen-final-de-m%C3%A9tricas-rmse-mape"><i class="fa fa-check"></i><b>5.13</b> Resumen final de métricas (RMSE / MAPE)</a></li>
+<li class="chapter" data-level="5.14" data-path="Modelización.html"><a href="Modelización.html#gr%C3%A1ficas-de-predicci%C3%B3n-por-modelo"><i class="fa fa-check"></i><b>5.14</b> Gráficas de predicción por modelo</a></li>
+<li class="chapter" data-level="5.15" data-path="Modelización.html"><a href="Modelización.html#resumen-de-tiempos-de-ejecuci%C3%B3n-del-c%C3%B3digo-1"><i class="fa fa-check"></i><b>5.15</b> Resumen de tiempos de ejecución del código</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html"><i class="fa fa-check"></i><b>6</b> Modelos estacionarios - Metodología Box-Jenkins</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#introducci%C3%B3n"><i class="fa fa-check"></i><b>6.1</b> Introducción</a></li>
+<li class="chapter" data-level="6.2" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#carga-de-datos"><i class="fa fa-check"></i><b>6.2</b> Carga de datos</a></li>
+<li class="chapter" data-level="6.3" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#limpieza-e-imputaci%C3%B3n-de-faltantes"><i class="fa fa-check"></i><b>6.3</b> Limpieza e imputación de faltantes</a></li>
+<li class="chapter" data-level="6.4" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#creaci%C3%B3n-de-la-serie-de-tiempo"><i class="fa fa-check"></i><b>6.4</b> Creación de la serie de tiempo</a></li>
+<li class="chapter" data-level="6.5" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#exploraci%C3%B3n-inicial"><i class="fa fa-check"></i><b>6.5</b> Exploración inicial</a></li>
+<li class="chapter" data-level="6.6" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#estacionariedad-adf-y-acfpacf"><i class="fa fa-check"></i><b>6.6</b> Estacionariedad (ADF) y ACF/PACF</a></li>
+<li class="chapter" data-level="6.7" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#modelo-arima-boxjenkins"><i class="fa fa-check"></i><b>6.7</b> Modelo ARIMA (Box–Jenkins)</a></li>
+<li class="chapter" data-level="6.8" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#comparaci%C3%B3n-de-modelos-aicbic"><i class="fa fa-check"></i><b>6.8</b> Comparación de modelos (AIC/BIC)</a></li>
+<li class="chapter" data-level="6.9" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#diagn%C3%B3stico"><i class="fa fa-check"></i><b>6.9</b> Diagnóstico</a></li>
+<li class="chapter" data-level="6.10" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#pron%C3%B3stico"><i class="fa fa-check"></i><b>6.10</b> Pronóstico</a>
+<ul>
+<li class="chapter" data-level="6.10.1" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#zoom-%C3%BAltimos-7-d%C3%ADas-pron%C3%B3stico"><i class="fa fa-check"></i><b>6.10.1</b> Zoom: últimos 7 días + pronóstico</a></li>
+<li class="chapter" data-level="6.10.2" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#zoom-%C3%BAltimos-21-d%C3%ADas-7-d%C3%ADas-de-pron%C3%B3stico"><i class="fa fa-check"></i><b>6.10.2</b> Zoom: últimos 21 días + 7 días de pronóstico</a></li>
+<li class="chapter" data-level="6.10.3" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#zoom-%C3%BAltimos-6-meses-3-meses-de-pron%C3%B3stico"><i class="fa fa-check"></i><b>6.10.3</b> Zoom: últimos 6 meses + 3 meses de pronóstico</a></li>
+</ul></li>
+<li class="chapter" data-level="6.11" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#conclusiones-2"><i class="fa fa-check"></i><b>6.11</b> Conclusiones</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="prophet.html"><a href="prophet.html"><i class="fa fa-check"></i><b>7</b> Regresion series de tiempo - Algortimo Facebook’s Prophet</a></li>
+<li class="chapter" data-level="8" data-path="introducción-1.html"><a href="introducción-1.html"><i class="fa fa-check"></i><b>8</b> 1. Introducción</a></li>
+<li class="chapter" data-level="9" data-path="objetivo.html"><a href="objetivo.html"><i class="fa fa-check"></i><b>9</b> 2. Objetivo</a></li>
+<li class="chapter" data-level="10" data-path="marco-teórico-regresión-y-series-de-tiempo.html"><a href="marco-teórico-regresión-y-series-de-tiempo.html"><i class="fa fa-check"></i><b>10</b> 3. Marco teórico: regresión y series de tiempo</a>
+<ul>
+<li class="chapter" data-level="10.1" data-path="marco-teórico-regresión-y-series-de-tiempo.html"><a href="marco-teórico-regresión-y-series-de-tiempo.html#regresi%C3%B3n-con-errores-armaarima"><i class="fa fa-check"></i><b>10.1</b> 3.1 Regresión con errores ARMA/ARIMA</a></li>
+<li class="chapter" data-level="10.2" data-path="marco-teórico-regresión-y-series-de-tiempo.html"><a href="marco-teórico-regresión-y-series-de-tiempo.html#estacionariedad-y-modelos-en-diferencias"><i class="fa fa-check"></i><b>10.2</b> 3.2 Estacionariedad y modelos en diferencias</a></li>
+<li class="chapter" data-level="10.3" data-path="marco-teórico-regresión-y-series-de-tiempo.html"><a href="marco-teórico-regresión-y-series-de-tiempo.html#prophet-como-regresi%C3%B3n-no-lineal-en-el-tiempo"><i class="fa fa-check"></i><b>10.3</b> 3.3 Prophet como regresión no lineal en el tiempo</a></li>
+<li class="chapter" data-level="10.4" data-path="marco-teórico-regresión-y-series-de-tiempo.html"><a href="marco-teórico-regresión-y-series-de-tiempo.html#justificaci%C3%B3n-para-la-serie-de-potencia-el%C3%A9ctrica"><i class="fa fa-check"></i><b>10.4</b> 3.4 Justificación para la serie de potencia eléctrica</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="descripción-de-los-datos.html"><a href="descripción-de-los-datos.html"><i class="fa fa-check"></i><b>11</b> 4. Descripción de los datos</a>
+<ul>
+<li class="chapter" data-level="11.1" data-path="descripción-de-los-datos.html"><a href="descripción-de-los-datos.html#carga-de-datos-1"><i class="fa fa-check"></i><b>11.1</b> 4.1 Carga de datos</a></li>
+</ul></li>
+<li class="chapter" data-level="12" data-path="limpieza-e-imputación-de-faltantes-1.html"><a href="limpieza-e-imputación-de-faltantes-1.html"><i class="fa fa-check"></i><b>12</b> 5. Limpieza e imputación de faltantes</a></li>
+<li class="chapter" data-level="13" data-path="exploración-inicial-de-la-serie.html"><a href="exploración-inicial-de-la-serie.html"><i class="fa fa-check"></i><b>13</b> 6. Exploración inicial de la serie</a>
+<ul>
+<li class="chapter" data-level="13.1" data-path="exploración-inicial-de-la-serie.html"><a href="exploración-inicial-de-la-serie.html#serie-completa"><i class="fa fa-check"></i><b>13.1</b> 6.1 Serie completa</a></li>
+<li class="chapter" data-level="13.2" data-path="exploración-inicial-de-la-serie.html"><a href="exploración-inicial-de-la-serie.html#conversi%C3%B3n-a-tsibble"><i class="fa fa-check"></i><b>13.2</b> 6.2 Conversión a tsibble</a></li>
+<li class="chapter" data-level="13.3" data-path="exploración-inicial-de-la-serie.html"><a href="exploración-inicial-de-la-serie.html#descomposici%C3%B3n-cl%C3%A1sica-ejemplo-adicional"><i class="fa fa-check"></i><b>13.3</b> 6.3 Descomposición clásica (ejemplo adicional)</a></li>
+</ul></li>
+<li class="chapter" data-level="14" data-path="división-entrenamientoprueba.html"><a href="división-entrenamientoprueba.html"><i class="fa fa-check"></i><b>14</b> 7. División entrenamiento–prueba</a></li>
+<li class="chapter" data-level="15" data-path="ajuste-de-modelos-arima-ets-y-prophet.html"><a href="ajuste-de-modelos-arima-ets-y-prophet.html"><i class="fa fa-check"></i><b>15</b> 8. Ajuste de modelos ARIMA, ETS y Prophet</a>
+<ul>
+<li class="chapter" data-level="15.1" data-path="ajuste-de-modelos-arima-ets-y-prophet.html"><a href="ajuste-de-modelos-arima-ets-y-prophet.html#ajuste-conjunto-de-modelos"><i class="fa fa-check"></i><b>15.1</b> 8.1 Ajuste conjunto de modelos</a></li>
+<li class="chapter" data-level="15.2" data-path="ajuste-de-modelos-arima-ets-y-prophet.html"><a href="ajuste-de-modelos-arima-ets-y-prophet.html#diagn%C3%B3stico-de-residuos"><i class="fa fa-check"></i><b>15.2</b> 8.2 Diagnóstico de residuos</a></li>
+</ul></li>
+<li class="chapter" data-level="16" data-path="pronósticos-y-comparación-automática.html"><a href="pronósticos-y-comparación-automática.html"><i class="fa fa-check"></i><b>16</b> 9. Pronósticos y comparación automática</a>
+<ul>
+<li class="chapter" data-level="16.1" data-path="pronósticos-y-comparación-automática.html"><a href="pronósticos-y-comparación-automática.html#pron%C3%B3sticos-sobre-el-horizonte-de-prueba"><i class="fa fa-check"></i><b>16.1</b> 9.1 Pronósticos sobre el horizonte de prueba</a></li>
+<li class="chapter" data-level="16.2" data-path="pronósticos-y-comparación-automática.html"><a href="pronósticos-y-comparación-automática.html#visualizaci%C3%B3n-comparativa-de-pron%C3%B3sticos"><i class="fa fa-check"></i><b>16.2</b> 9.2 Visualización comparativa de pronósticos</a></li>
+<li class="chapter" data-level="16.3" data-path="pronósticos-y-comparación-automática.html"><a href="pronósticos-y-comparación-automática.html#tabla-comparativa-autom%C3%A1tica-arima-ets-prophet"><i class="fa fa-check"></i><b>16.3</b> 9.3 Tabla comparativa automática (ARIMA, ETS, Prophet)</a></li>
+<li class="chapter" data-level="16.4" data-path="pronósticos-y-comparación-automática.html"><a href="pronósticos-y-comparación-automática.html#visualizaci%C3%B3n-pron%C3%B3sticos-1mes-3meses-6-meses"><i class="fa fa-check"></i><b>16.4</b> Visualización pronósticos 1mes / 3meses / 6 meses</a></li>
+</ul></li>
+<li class="chapter" data-level="17" data-path="discusión-de-resultados.html"><a href="discusión-de-resultados.html"><i class="fa fa-check"></i><b>17</b> 10. Discusión de resultados</a></li>
+<li class="chapter" data-level="18" data-path="reflexión-regresión-y-series-de-tiempo.html"><a href="reflexión-regresión-y-series-de-tiempo.html"><i class="fa fa-check"></i><b>18</b> 11. Reflexión: regresión y series de tiempo</a>
+<ul>
+<li class="chapter" data-level="18.1" data-path="reflexión-regresión-y-series-de-tiempo.html"><a href="reflexión-regresión-y-series-de-tiempo.html#cu%C3%A1ndo-es-%C3%BAtil-la-relaci%C3%B3n-regresi%C3%B3nserie-de-tiempo"><i class="fa fa-check"></i><b>18.1</b> 11.1 ¿Cuándo es útil la relación regresión–serie de tiempo?</a></li>
+<li class="chapter" data-level="18.2" data-path="reflexión-regresión-y-series-de-tiempo.html"><a href="reflexión-regresión-y-series-de-tiempo.html#puede-trasladarse-a-otras-situaciones-ejemplos"><i class="fa fa-check"></i><b>18.2</b> 11.2 ¿Puede trasladarse a otras situaciones? Ejemplos</a></li>
+</ul></li>
+<li class="chapter" data-level="19" data-path="conclusiones-3.html"><a href="conclusiones-3.html"><i class="fa fa-check"></i><b>19</b> 12. Conclusiones</a></li>
+<li class="chapter" data-level="20" data-path="referencias-1.html"><a href="referencias-1.html"><i class="fa fa-check"></i><b>20</b> 13. Referencias</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Propuesta de serie de tiempo: Predicción de demanda eléctrica a corto plazo</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="división-entrenamientoprueba" class="section level1 hasAnchor" number="14">
+<h1><span class="header-section-number">14</span> 7. División entrenamiento–prueba<a href="división-entrenamientoprueba.html#divisi%C3%B3n-entrenamientoprueba" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>Se reserva un subconjunto final de la serie para evaluar la capacidad predictiva de los modelos. A modo de ejemplo, se toma <strong>una semana de datos horarios</strong> como conjunto de prueba.</p>
+<div class="sourceCode" id="cb191"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb191-1"><a href="división-entrenamientoprueba.html#cb191-1" tabindex="-1"></a>n_total <span class="ot">&lt;-</span> <span class="fu">nrow</span>(datos_ts)</span>
+<span id="cb191-2"><a href="división-entrenamientoprueba.html#cb191-2" tabindex="-1"></a>n_test  <span class="ot">&lt;-</span> <span class="dv">24</span> <span class="sc">*</span> <span class="dv">30</span> <span class="sc">*</span> <span class="dv">6</span>  <span class="co"># 6 meses</span></span>
+<span id="cb191-3"><a href="división-entrenamientoprueba.html#cb191-3" tabindex="-1"></a>n_train <span class="ot">&lt;-</span> n_total <span class="sc">-</span> n_test</span>
+<span id="cb191-4"><a href="división-entrenamientoprueba.html#cb191-4" tabindex="-1"></a></span>
+<span id="cb191-5"><a href="división-entrenamientoprueba.html#cb191-5" tabindex="-1"></a>datos_train <span class="ot">&lt;-</span> datos_ts <span class="sc">%&gt;%</span> <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span>n_train)</span>
+<span id="cb191-6"><a href="división-entrenamientoprueba.html#cb191-6" tabindex="-1"></a>datos_test  <span class="ot">&lt;-</span> datos_ts <span class="sc">%&gt;%</span> <span class="fu">slice</span>((n_train <span class="sc">+</span> <span class="dv">1</span>)<span class="sc">:</span>n_total)</span>
+<span id="cb191-7"><a href="división-entrenamientoprueba.html#cb191-7" tabindex="-1"></a></span>
+<span id="cb191-8"><a href="división-entrenamientoprueba.html#cb191-8" tabindex="-1"></a>n_total; n_train; n_test</span></code></pre></div>
+<pre><code>## [1] 58448</code></pre>
+<pre><code>## [1] 54128</code></pre>
+<pre><code>## [1] 4320</code></pre>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="exploración-inicial-de-la-serie.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="ajuste-de-modelos-arima-ets-y-prophet.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+  "sharing": false,
+  "fontsettings": {
+    "theme": "white",
+    "family": "sans",
+    "size": 2
+  },
+  "edit": {
+    "link": null,
+    "text": null
+  },
+  "history": {
+    "link": null,
+    "text": null
+  },
+  "view": {
+    "link": null,
+    "text": null
+  },
+  "download": ["propuesta-pronostico-subestacion.pdf", "propuesta-pronostico-subestacion.epub"],
+  "search": {
+    "engine": "fuse",
+    "options": null
+  },
+  "toc": {
+    "collapse": "subsection",
+    "toc_depth": 2
+  }
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

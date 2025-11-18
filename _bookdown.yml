@@ -8,6 +8,7 @@ rmd_files:
   - "03-Preprocesamiento_y_visualizacion.Rmd"
   - "04-Modelizacion_Holt_Winter.Rmd"
   - "05-Modelizacion_Box_Jenkins.Rmd"
+  - "06-Regresion_Series_Tiempo_Prophet.Rmd"
   
   
 

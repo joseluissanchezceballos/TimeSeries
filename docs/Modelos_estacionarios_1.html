@@ -30,7 +30,7 @@
   
   
 <link rel="prev" href="Modelización.html"/>
-
+<link rel="next" href="Prophet.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -51,6 +51,14 @@
 <link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
 <link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
 <script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<link href="libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet" />
+<script src="libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<script src="libs/plotly-binding-4.11.0/plotly.js"></script>
+<script src="libs/typedarray-0.1/typedarray.min.js"></script>
+<link href="libs/crosstalk-1.2.2/css/crosstalk.min.css" rel="stylesheet" />
+<script src="libs/crosstalk-1.2.2/js/crosstalk.min.js"></script>
+<link href="libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
 
 
 <style type="text/css">
@@ -247,6 +255,48 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="6.10.3" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#zoom-%C3%BAltimos-6-meses-3-meses-de-pron%C3%B3stico"><i class="fa fa-check"></i><b>6.10.3</b> Zoom: últimos 6 meses + 3 meses de pronóstico</a></li>
 </ul></li>
 <li class="chapter" data-level="6.11" data-path="Modelos_estacionarios_1.html"><a href="Modelos_estacionarios_1.html#conclusiones-2"><i class="fa fa-check"></i><b>6.11</b> Conclusiones</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="Prophet.html"><a href="Prophet.html"><i class="fa fa-check"></i><b>7</b> Regresión en series de tiempo - Algoritmo Facebook’s Prophet</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="Prophet.html"><a href="Prophet.html#introducci%C3%B3n-1"><i class="fa fa-check"></i><b>7.1</b> Introducción</a></li>
+<li class="chapter" data-level="7.2" data-path="Prophet.html"><a href="Prophet.html#regresi%C3%B3n-y-series-de-tiempo"><i class="fa fa-check"></i><b>7.2</b> Regresión y series de tiempo</a>
+<ul>
+<li class="chapter" data-level="7.2.1" data-path="Prophet.html"><a href="Prophet.html#regresi%C3%B3n-con-errores-armaarima"><i class="fa fa-check"></i><b>7.2.1</b> Regresión con errores ARMA/ARIMA</a></li>
+<li class="chapter" data-level="7.2.2" data-path="Prophet.html"><a href="Prophet.html#estacionariedad-y-modelos-en-diferencias"><i class="fa fa-check"></i><b>7.2.2</b> Estacionariedad y modelos en diferencias</a></li>
+<li class="chapter" data-level="7.2.3" data-path="Prophet.html"><a href="Prophet.html#prophet-como-regresi%C3%B3n-no-lineal-en-el-tiempo"><i class="fa fa-check"></i><b>7.2.3</b> Prophet como regresión no lineal en el tiempo</a></li>
+<li class="chapter" data-level="7.2.4" data-path="Prophet.html"><a href="Prophet.html#justificaci%C3%B3n-para-la-serie-de-potencia-el%C3%A9ctrica"><i class="fa fa-check"></i><b>7.2.4</b> Justificación para la serie de potencia eléctrica</a></li>
+</ul></li>
+<li class="chapter" data-level="7.3" data-path="Prophet.html"><a href="Prophet.html#descripci%C3%B3n-de-los-datos"><i class="fa fa-check"></i><b>7.3</b> Descripción de los datos</a></li>
+<li class="chapter" data-level="7.4" data-path="Prophet.html"><a href="Prophet.html#limpieza-e-imputaci%C3%B3n-de-faltantes-1"><i class="fa fa-check"></i><b>7.4</b> Limpieza e imputación de faltantes</a></li>
+<li class="chapter" data-level="7.5" data-path="Prophet.html"><a href="Prophet.html#exploraci%C3%B3n-inicial-de-la-serie"><i class="fa fa-check"></i><b>7.5</b> Exploración inicial de la serie</a>
+<ul>
+<li class="chapter" data-level="7.5.1" data-path="Prophet.html"><a href="Prophet.html#serie-de-datos-potencia-y-temperatura"><i class="fa fa-check"></i><b>7.5.1</b> Serie de datos: Potencia y Temperatura</a></li>
+<li class="chapter" data-level="7.5.2" data-path="Prophet.html"><a href="Prophet.html#l%C3%ADneas-suavizadas-loess---suavizamiento-estimado-localmente"><i class="fa fa-check"></i><b>7.5.2</b> Líneas suavizadas (LOESS - suavizamiento estimado localmente)</a></li>
+<li class="chapter" data-level="7.5.3" data-path="Prophet.html"><a href="Prophet.html#promedios-m%C3%B3viles-1"><i class="fa fa-check"></i><b>7.5.3</b> Promedios móviles</a></li>
+</ul></li>
+<li class="chapter" data-level="7.6" data-path="Prophet.html"><a href="Prophet.html#correlaci%C3%B3n-temperaturapotencia"><i class="fa fa-check"></i><b>7.6</b> Correlación temperatura–potencia</a>
+<ul>
+<li class="chapter" data-level="7.6.1" data-path="Prophet.html"><a href="Prophet.html#correlaci%C3%B3n-din%C3%A1mica-temperaturapotencia"><i class="fa fa-check"></i><b>7.6.1</b> Correlación dinámica temperatura–potencia</a></li>
+<li class="chapter" data-level="7.6.2" data-path="Prophet.html"><a href="Prophet.html#matriz-de-dispersi%C3%B3n-y-correlaci%C3%B3n-global-temperaturapotencia"><i class="fa fa-check"></i><b>7.6.2</b> Matriz de dispersión y correlación global (temperatura–potencia)</a></li>
+</ul></li>
+<li class="chapter" data-level="7.7" data-path="Prophet.html"><a href="Prophet.html#conversi%C3%B3n-a-tsibble"><i class="fa fa-check"></i><b>7.7</b> Conversión a tsibble</a></li>
+<li class="chapter" data-level="7.8" data-path="Prophet.html"><a href="Prophet.html#descomposici%C3%B3n-cl%C3%A1sica"><i class="fa fa-check"></i><b>7.8</b> Descomposición clásica</a></li>
+<li class="chapter" data-level="7.9" data-path="Prophet.html"><a href="Prophet.html#divisi%C3%B3n-de-los-datos-en-entrenamiento-y-prueba"><i class="fa fa-check"></i><b>7.9</b> División de los datos en entrenamiento y prueba</a></li>
+<li class="chapter" data-level="7.10" data-path="Prophet.html"><a href="Prophet.html#ajuste-de-modelos-arima-ets-y-prophet"><i class="fa fa-check"></i><b>7.10</b> Ajuste de modelos ARIMA, ETS y Prophet</a>
+<ul>
+<li class="chapter" data-level="7.10.1" data-path="Prophet.html"><a href="Prophet.html#modelos-fable-arimax-con-temp-ets-sin-regresor"><i class="fa fa-check"></i><b>7.10.1</b> Modelos fable: ARIMAX (con <code>temp</code>) + ETS (sin regresor)</a></li>
+<li class="chapter" data-level="7.10.2" data-path="Prophet.html"><a href="Prophet.html#prophet-con-regresor-temp-no-fable"><i class="fa fa-check"></i><b>7.10.2</b> Prophet con regresor <code>temp</code> (NO fable)</a></li>
+</ul></li>
+<li class="chapter" data-level="7.11" data-path="Prophet.html"><a href="Prophet.html#pron%C3%B3sticos-y-comparaci%C3%B3n-de-m%C3%A9tricas"><i class="fa fa-check"></i><b>7.11</b> Pronósticos y comparación de métricas</a>
+<ul>
+<li class="chapter" data-level="7.11.1" data-path="Prophet.html"><a href="Prophet.html#comparaci%C3%B3n-gr%C3%A1fica-de-los-pron%C3%B3sticos"><i class="fa fa-check"></i><b>7.11.1</b> Comparación gráfica de los pronósticos</a></li>
+</ul></li>
+<li class="chapter" data-level="7.12" data-path="Prophet.html"><a href="Prophet.html#diagn%C3%B3stico-de-residuos-prophet"><i class="fa fa-check"></i><b>7.12</b> Diagnóstico de residuos Prophet</a>
+<ul>
+<li class="chapter" data-level="7.12.1" data-path="Prophet.html"><a href="Prophet.html#resumen-num%C3%A9rico-de-residuos-media-sd-skewness-kurtosis"><i class="fa fa-check"></i><b>7.12.1</b> Resumen numérico de residuos (media, sd, skewness, kurtosis)</a></li>
+<li class="chapter" data-level="7.12.2" data-path="Prophet.html"><a href="Prophet.html#comparaci%C3%B3n-gr%C3%A1fica-de-residuos-arimax-ets-prophet"><i class="fa fa-check"></i><b>7.12.2</b> Comparación gráfica de residuos (ARIMAX, ETS, Prophet)</a></li>
+</ul></li>
+<li class="chapter" data-level="7.13" data-path="Prophet.html"><a href="Prophet.html#conclusiones-3"><i class="fa fa-check"></i><b>7.13</b> Conclusiones</a></li>
 </ul></li>
 </ul>
 
@@ -795,8 +845,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           </div>
         </div>
       </div>
-<a href="Modelización.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-
+<a href="Modelización.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="Prophet.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -841,6 +891,20 @@ gitbook.start({
 });
 </script>
 
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
 </body>
 
 </html>

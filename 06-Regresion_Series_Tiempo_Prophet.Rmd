@@ -1,0 +1,1060 @@
+# Regresión en series de tiempo - Algoritmo Facebook's Prophet {#Prophet}
+
+```{r setup_prophet, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE
+)
+#install.packages("prophet")
+#install.packages("moments")
+
+# Librerías base
+library(tidyverse)
+library(lubridate)
+library(janitor)
+library(forecast)
+library(dplyr)
+library(plotly)
+library(zoo)
+library(slider)
+library(ggplot2)
+
+library(yardstick)
+library(tidyr)
+library(tibble)
+library(patchwork)
+library(moments)
+
+library(fpp3)
+library(fable.prophet)
+library(tsibble)
+library(feasts)
+library(fable)
+library(prophet)
+
+```
+
+## Introducción
+
+En este capítulo se **combinan modelos causales con datos de series de tiempo** mediante algoritmos de aprendizaje estadístico. Esto supone pasar de ver la serie únicamente como una sucesión de observaciones dependientes en el tiempo, a interpretarla también como el resultado de una **relación de regresión** entre la variable respuesta y uno o varios regresores.
+
+En este capítulo se realizan las siguientes actividades para interpretar la serie de **potencia de una subestación eléctrica**:
+
+-   Limpieza, imputación y exploración de la serie.
+-   Ajuste de modelos autorregresivos clásicos (ARIMA, ETS).
+-   Ajuste del modelo **Prophet**, utilizando la variable temperatura como regresor.
+-   Comparación de desempeño entre modelos (ARIMA, ETS, Prophet).
+
+## Regresión y series de tiempo
+
+### Regresión con errores ARMA/ARIMA
+
+En la regresión clásica se supone que los errores son independientes y con varianza constante. En las series de tiempo esta suposición suele violarse: los errores muestran **autocorrelación**, tendencia o cambios de varianza. Una manera de incorporar esta estructura es suponer que el error sigue un proceso ARMA/ARIMA.
+
+Un modelo general puede escribirse como:
+
+$$
+y_t = \beta_0 + \beta_1 x_{1,t} + \cdots + \beta_k x_{k,t} + \eta_t,
+$$
+
+donde $\eta_t$ sigue un proceso ARIMA. Esto es lo que se conoce como un modelo de **regresión con errores ARIMA**, o un modelo ARIMAX cuando los regresores son variables externas.
+
+-   Todas las variables del modelo deben ser **estacionarias** o, al menos, cointegradas.
+-   Cuando no lo son, se trabaja sobre las **diferencias** (modelo en diferencias) en lugar de los niveles.
+
+### Estacionariedad y modelos en diferencias
+
+Si las series $y_t$ y $x_{i,t}$ no son estacionarias, una práctica habitual es diferenciarlas:
+
+$$
+y_t' = y_t - y_{t-1}, \quad x_{i,t}' = x_{i,t} - x_{i,t-1}.
+$$
+
+Así, podemos ajustar un modelo de la forma:
+
+$$
+y_t' = \beta_1 x'_{1,t} + \cdots + \beta_k x'_{k,t} + \eta_t',
+$$
+
+donde $\eta_t'$ sigue un proceso ARMA. Tal como se discute en el material de la unidad, esto es equivalente a un modelo de **regresión con errores ARIMA**, pero expresado en diferencias. De este modo, la regresión respeta la estructura de dependencia temporal de la serie.
+
+### Prophet como regresión no lineal en el tiempo
+
+El modelo **Prophet**, introducido por Facebook (Taylor & Letham, 2018), puede entenderse como una regresión no lineal sobre el tiempo:
+
+$$
+y_t = g(t) + s(t) + h(t) + \varepsilon_t,
+$$
+
+donde:
+
+-   $g(t)$ representa la **tendencia** (lineal por tramos o logística).
+-   $s(t)$ captura los comportamientos **estacionales** mediante términos de Fourier.
+-   $h(t)$ incorpora los efectos de **eventos especiales** (por ejemplo, festivos).
+-   $\varepsilon_t$ es un término de error aproximadamente de ruido blanco.
+
+En este modelo, el tiempo actúa como un regresor principal, al que se agregan regresores derivados (tendencia por tramos, términos de Fourier para estacionalidad, variables indicadoras para eventos). Por esto, Prophet encaja muy bien dentro de la idea de **regresión en series de tiempo**, pero con componentes flexibles y no lineales.
+
+### Justificación para la serie de potencia eléctrica
+
+La serie de potencia de una subestación eléctrica presenta típicamente:
+
+-   Comportamientos cíclicos (diarios, semanales...).
+-   Cambios de nivel asociados a patrones de uso, clima, calendario, etc.
+-   Variabilidad considerable, con posibles picos y valles.
+
+Desde esta perspectiva, es razonable interpretar la serie como el resultado de:
+
+-   Una tendencia $g(t)$ asociada a la evolución de la demanda en el tiempo.
+-   Estacionalidades $s(t)$ debidas a ciclos de consumo (por ejemplo, horario laboral vs. nocturno).
+-   Posibles efectos $h(t)$ asociados a fechas específicas (mantenimientos, eventos especiales).
+-   Un componente aleatorio $\varepsilon_t$.
+
+Por lo tanto, tiene sentido aplicar Prophet a esta serie y, al mismo tiempo, compararlo con modelos ARIMA y ETS utilizados previamente.
+
+## Descripción de los datos
+
+Los datos corresponden a mediciones de **potencia (kW)** registradas en una subestación eléctrica, a la **temperatura (°C)** y al índice temporal `fecha` (fecha-hora).
+
+```{r carga-datos20000}
+csv_dir  <- "C:/Users/Lenovo/PUJ Cali/OSCAR VELASQUEZ CHALA - Proyecto Aplicado - Proy. Demanda Electrica/2. Fuentes de Datos"
+csv_name <- "2025.11.15.potencia_temperatura.csv"
+ruta_archivo <- file.path(csv_dir, csv_name)
+
+datos_raw <- read.csv(ruta_archivo,
+                      header = TRUE,
+                      sep = ",",
+                      stringsAsFactors = FALSE)
+
+str(datos_raw)
+head(datos_raw)
+```
+
+-   Los datos corresponden a una serie horaria entre los años 2019–2025.
+
+## Limpieza e imputación de faltantes
+
+A continuación, se aplica la limpieza e imputación de datos faltanters.
+
+```{r limpieza-imputacion20000}
+datos <- datos_raw %>%
+  janitor::clean_names() %>%        
+  mutate(
+    fecha = lubridate::ymd_hms(fecha)
+  ) %>%
+  arrange(fecha)
+
+# Comprobar NA en la serie
+cat("Cantidad de datos faltantes variable potencia, dataset original: ",
+    sum(is.na(datos$potencia)), "\n")
+
+cat("Cantidad de datos faltantes variable temperatura, dataset original: ",
+    sum(is.na(datos$temp)), "\n")
+
+# Interpolar NA para no romper la serie horaria
+# (usa método de forecast, respeta patrones)
+serie_sin_na <- forecast::na.interp(datos$potencia)
+
+# Volvemos a pegar a los datos
+datos <- datos %>%
+  mutate(potencia = serie_sin_na)
+
+# Comprobar NA en la serie
+cat("Cantidad de datos faltantes, después de la imputación: ",
+    sum(is.na(datos$potencia)), "\n")
+
+cat("Resumen Serie de Datos - Potencia Subestación Eléctrica", "\n")
+summary(datos$potencia)
+
+cat("Resumen Serie de Datos - Temperatura", "\n")
+summary(datos$temp)
+```
+
+-   La variable **potencia** tenía faltantes, pero todos fueron imputados mediante interpolación (na.interp), preservando la continuidad temporal.
+
+-   Los datos de la variable **potencia** presentan una distribución asimétrica hacia la derecha, con valores máximos significativamente superiores al promedio. Valores cercanos a 0 kW (mínimo) representan probablemente caídas abruptas: cortes de energía, mantenimientos, fallos de medición o cargas extremadamente bajas fuera de horario.
+
+-   La variable **temperatura** no presenta faltantes, lo cual es muy favorable para la aplicación de modelos con regresores externos (ARIMAX, Prophet).
+
+-   Los datos de **temperatura** indican un promedio estable (≈ 25 °C), variabilidad moderada entre 17–35 °C, comportamientos cíclicos diarios (noches frías, días cálidos) y ciclos estacionales (épocas cálidas/frías del año).
+
+## Exploración inicial de la serie
+
+### Serie de datos: Potencia y Temperatura
+
+```{r exploracion-serie-interactiva20000, message=FALSE, warning=FALSE}
+
+fig <- plot_ly()
+
+# ----------------------------
+# SERIE 1: Potencia (eje izquierdo)
+# ----------------------------
+fig <- fig %>%
+  add_lines(
+    data = datos,
+    x = ~fecha,
+    y = ~potencia,      
+    name = "Potencia",
+    line = list(color = "blue")
+  )
+
+# ----------------------------
+# SERIE 2: Temperatura (eje derecho)
+# ----------------------------
+fig <- fig %>%
+  add_lines(
+    data = datos,
+    x = ~fecha,
+    y = ~temp,
+    name = "Temperatura",
+    yaxis = "y2",
+    line = list(color = "red")
+  )
+
+# ----------------------------
+# CONFIGURACIÓN DE LOS EJES
+# ----------------------------
+fig <- fig %>%
+  layout(
+    title = "Potencia y Temperatura - Exploración Temporal",
+    xaxis = list(title = "Fecha"),
+    yaxis = list(title = "Potencia (kW)", side = "left"),
+    yaxis2 = list(
+      title = "Temperatura (°C)",
+      overlaying = "y",
+      side = "right",
+      showgrid = FALSE
+    ),
+    legend = list(
+      x = 1.05,       # Posición horizontal (derecha)
+      y = 0.8,        # Centrada verticalmente
+      orientation = "v"  # Leyenda vertical
+    )
+  )
+
+fig
+
+```
+
+```{r subplot-interactivo20000, message=FALSE, warning=FALSE}
+fig_pot <- plot_ly(datos, x = ~fecha, y = ~potencia,
+                   type="scatter", mode="lines",
+                   name="Potencia", line=list(color="blue"))
+
+fig_temp <- plot_ly(datos, x = ~fecha, y = ~temp,
+                    type="scatter", mode="lines",
+                    name="Temperatura", line=list(color="red"))
+
+subplot(
+  fig_pot, fig_temp,
+  nrows = 2,
+  shareX = TRUE,
+  titleX = TRUE,
+  titleY = TRUE
+) %>%
+  layout(title = "Series de Potencia y Temperatura")
+```
+
+-   En la gráfica de **potencia** se observa:
+    -   Picos pronunciados y caídas abruptas.
+    -   A partir de 2022-2025 la serie parece tener un incremento estructural, posiblemente por crecimiento de la demanda, expansión de cargas, cambios climáticos, aumento de producción industrial/comercial.
+    -   Existe un patrón ondulante, correspondiente a series horarias con estacionalidad diaria.
+    -   La potencia eléctrica muestra estacionalidad diaria, tendencia creciente a lo largo de los años, ruido alto + picos pronunciados, caídas esporádicas (valores casi cero).
+-   En la gráfica de **temperatura** se observa:
+    -   Curva completamente ondulante, repetitiva, con ciclos bien definidos.
+    -   Se observan noches más frías, días más cálidos.
+    -   La temperatura muestra un patrón regular y estable, ciclos repetitivos diarios, incrementos estacionales ligeros, no tiene valores atípicos extremos.
+-   Observando las gráficas superpuestas de **potencia y temperatura** se observa:
+    -   Un patron sincronizado: cuando la temperatura sube, la Potencia sube; y cuando la temperatura baja, la Potencia baja.
+    -   La potencia tiene un desfase mínimo respecto a la temperatura, lo que sugiere relación causal directa (climatización) y sensibilidad inmediata al calor.
+    -   La temperatura máxima entre 11am–3pm coincide con picos de potencia.
+    -   La temperatura mínima en madrugada coincide con mínimos de potencia.
+    -   Correlación directa fuerte entre las variables a nivel diario, asociación creciente a medida que sube la carga base de la subestación, altas temperaturas inducen alta demanda eléctrica (principalmente por climatización). por lo tanto, se asumen que la señal de potencia combina demanda térmica (relación directa con temperatura) y demanda no térmica (ruido de operación, cargas industriales/comerciales).
+
+### Líneas suavizadas (LOESS - suavizamiento estimado localmente)
+
+```{r loess-interactivo20000, message=FALSE, warning=FALSE}
+
+# Gráfico con línea original + suavizado LOESS
+fig_loess <- plot_ly()
+
+fig_loess <- fig_loess %>%
+  add_lines(
+    data = datos,
+    x = ~fecha,
+    y = ~potencia,
+    name = "Potencia",
+    line = list(color = "steelblue")
+  ) %>%
+  add_lines(
+    data = datos,
+    x = ~fecha,
+    y = ~fitted(loess(potencia ~ as.numeric(fecha), span = 0.1)),
+    name = "LOESS suavizado",
+    line = list(color = "red", width = 3)
+  ) %>%
+  layout(
+    title = "Potencia con suavizado LOESS",
+    xaxis = list(title = "Fecha"),
+    yaxis = list(title = "Potencia")
+  )
+
+fig_loess
+
+```
+
+-   La curva de suavizado LOESS representa la tendencia real, libre de ruido, durante 2019–2025, se observa :
+
+    -   Tendencia general creciente, debido tal vez al incremento sostenido de carga conectada, al aumento progresivo del consumo de hogares/industria o a mayor uso de equipos eléctricos.
+    -   Comportamientos por periodos:
+        -   2019 – inicio de 2020, asciende rápidamente desde valores bajos (\~0–1500 kW) hasta niveles más estables de 2500–2800 kW.
+        -   2020 – 2021, la demanda se mantiene relativamente estable entre 2700 y 3000 kW.
+        -   2022 – crecimiento moderado, se observa un incremento más claro hacia 3500–3800 kW.
+        -   2023 – ascenso fuerte, muestra mayor pendiente hacia niveles superiores a 4000 kW.
+        -   2024 - pico máximo estructural, el suavizado alcanza niveles cercanos a 4500–4800 kW.
+        -   2025 – estabilización, la curva parece estabilizarse o incluso reducirse ligeramente.
+
+-   La demanda eléctrica ha crecido de manera sostenida entre 2019 y
+
+    2025. 
+
+-   La serie no es estacionaria, tiene tendencia creciente.
+
+-   La serie original tiene mucho ruido y valores atípicos, pero LOESS revela un patrón claro y robusto.
+
+-   El comportamiento refleja aumento creciente de carga instalada, mayor uso de equipos eléctricos, influencia significativa de la temperatura, efectos estacionales de larga duración.
+
+-   LOESS demuestra que se deben usar modelos de forecasting capaces de capturar tendencia, incorporar regresores externos (como temperatura), manejar alta variabilidad, soportar valores atípicos.
+
+### Promedios móviles
+
+```{r promedios-moviles200000, message=FALSE, warning=FALSE}
+
+datos$SMA_24   <- zoo::rollmean(datos$potencia, k = 24, fill = NA)     # móvil diario
+datos$SMA_168  <- zoo::rollmean(datos$potencia, k = 24*7, fill = NA)   # móvil semanal
+datos$EMA_24   <- forecast::ma(datos$potencia, order = 24)             # suavizado exponencial simple
+
+fig_ma <- plot_ly() %>%
+  add_lines(data = datos, x = ~fecha, y = ~potencia, name = "Potencia") %>%
+  add_lines(data = datos, x = ~fecha, y = ~SMA_24,  name = "SMA 24h", line=list(color="orange")) %>%
+  add_lines(data = datos, x = ~fecha, y = ~SMA_168, name = "SMA 7 días", line=list(color="green")) %>%
+  add_lines(data = datos, x = ~fecha, y = ~EMA_24, name = "EMA 24h", line=list(color="red")) %>%
+  layout(
+    title = "Promedios móviles (SMA y EMA)",
+    xaxis = list(title = "Fecha"),
+    yaxis = list(title = "Potencia")
+  )
+
+fig_ma
+
+```
+
+-   La gráfica del promedio simple de 24 horas, captura la tendencia de corto plazo, útil para comparar semanas o evaluar drásticamente cambios diarios promedio, en esta se observa:
+
+    -   Ciclos diarios suavizados, los picos y valles del día se “aplanan”.
+    -   Comportamiento semanal más claro, en los primeros años (2019–2021), la SMA24h muestra un nivel estable alrededor de 2500–3000 kW.
+    -   Incremento gradual, la curva asciende principalmente hacia:
+        -   2022: \~3200–3500 kW
+        -   2023: \~3500–3800 kW
+        -   2024–2025: \~3800–4200 kW
+    -   Eliminación parcial de valores atípicos.
+
+-   La gráfica del promedio simple de 7 días, es ideal para detectar cambios estructurales (cambio de carga base, estacionalidades climáticas semanales o picos sostenidos), en esta se observa:
+
+    -   El suavizado elimina fluctuaciones interdiarias, resaltando variaciones inter-semanales.
+    -   Cambio progresivo de carga:
+        -   2019–2021: demanda estable (2700–3100 kW)
+        -   2022–2023: demanda en ascenso (3100–3600 kW)
+        -   2024–2025: estabilización alrededor de 3800–4200 kW
+    -   Desacople del ruido, permite ver mejor los cambios “reales” del sistema energético, aislados del ruido operativo y las variaciones diarias.
+
+-   La gráfica del promedio exponencial de 24 horas, es muy útil para detectar cambios rápidos en la demanda y para generar señales de alerta temprana en sistemas eléctricos, en esta se observa:
+
+    -   Respuesta más rápida a incrementos y caídas.
+    -   Al ser más sensible al comportamiento reciente, muestra aceleraciones en la tendencia, momentos donde la demanda aumenta más rápidamente, transiciones estacionales cortas.
+    -   Se mantiene dentro del rango intermedio, no suaviza tanto como SMA 7 días, pero tampoco es tan ruidoso como la serie original.
+
+-   La serie presenta un crecimiento progresivo y robusto en la demanda eléctrica durante los últimos 6 años.
+
+-   El SMA 24h y SMA 7d confirman la existencia de incrementos escalonados, no de un crecimiento lineal.
+
+-   El EMA 24h detecta cambios rápidos en el sistema, revelando que la carga eléctrica es altamente sensible a variaciones de corto plazo (temperatura, actividad, eventos).
+
+-   En conjunto, los promedios móviles permiten aislar tendencias reales y no solo el ruido horario.
+
+## Correlación temperatura–potencia
+
+### Correlación dinámica temperatura–potencia
+
+Para ver cómo cambia la correlación temp–potencia en el tiempo.
+
+```{r correlacion-dinamica20000, message=FALSE, warning=FALSE}
+
+window <- 24 * 7  # ventana de 1 semana, puedes ajustarla
+
+corr_ts <- datos %>%
+  mutate(
+    corr = slider::slide_dbl(
+      .x = pick(potencia, temp),
+      .f = ~ cor(.x$potencia, .x$temp, use = "complete.obs"),
+      .before = window, 
+      .complete = FALSE
+    )
+  )
+
+fig_corr <- corr_ts %>%
+  plot_ly(x = ~fecha, y = ~corr, type = "scatter", mode = "lines",
+          line = list(color = "purple")) %>%
+  layout(
+    title = "Correlación dinámica Potencia–Temperatura",
+    xaxis = list(title = "Fecha"),
+    yaxis = list(title = "Correlación")
+  )
+
+fig_corr
+
+```
+
+-   Es una serie temporal donde cada punto es la correlación entre potencia y temperatura, calculada en una ventana deslizante (7 días), a medida que avanza el tiempo, la correlación se actualiza con datos más recientes. Esto permite ver cómo cambia la relación entre temperatura y potencia a lo largo de los años.
+
+-   La correlación varía entre -0.6 y +0.4, esto indica que en algunos periodos, a mayor temperatura, mayor potencia, correlación positiva. En otros periodos, a mayor temperatura, menor potencia, correlación negativa. Esto es normal en sistemas eléctricos complejos porque la temperatura afecta algunas cargas (refrigeración, calefacción, equipos térmicos), pero otras cargas no térmicas (industria, comercio, alumbrado) operan independientemente de la temperatura.
+
+-   No hay una correlación estable, la relación no es constante; cambia según la estación del año, la hora del día, el tipo de carga conectada, el crecimiento de la demanda, los cambios climáticos y la variabilidad operativa.
+
+-   A partir de 2022 la correlación tiende a volverse más positiva, entre 2019 y 2021 la correlación está alrededor de 0, con fuertes oscilaciones. Desde 2022–2025 se observa un ligero sesgo hacia valores positivos (\~0 a +0.3). Es decir, la demanda térmica (climatización) tiene mayor peso en los años recientes. Esto puede deberse al aumento de temperatura ambiental, mayor uso de equipos de enfriamiento, mayor actividad en horas de calor, expansión de carga sensible a temperatura.
+
+### Matriz de dispersión y correlación global (temperatura–potencia)
+
+```{r message=FALSE, warning=FALSE}
+datos %>%
+  GGally::ggpairs(columns = 2:3)
+```
+
+-   La correlación de Pearson global es de 0.043.
+
+-   La Correlación global es extremadamente baja, es decir la temperatura no explica bien la potencia cuando se observa a nivel global (2019–2025).
+
+-   la gráfica de dispersión está muy dispersa, los puntos no forman una nube inclinada clara:
+
+    -   La potencia varía entre 0 y \~6000 sin un patrón definido.
+    -   La temperatura se mantiene entre \~17 y 35°C.
+
+-   Se observa el efecto de outliers de potencia = 0, los puntos en cero (caídas abruptas) afectan fuertemente la correlación global al reducir la linealidad, generar valores extremos que distorsionan la relación.
+
+-   La correlación global (0.043) es casi nula, la temperatura NO explica toda la potencia a nivel macro (2019–2025).
+
+-   La correlación dinámica revela ventanas donde la temperatura sí tiene impacto, especialmente en 2022–2025, cuando el sistema energético es más sensible al calor.
+
+-   El análisis dinámico captura información que un análisis global no puede, de allí la importancia de mirar correlación móvil y no solo correlación simple.
+
+-   El análisis muestra que la relación entre la temperatura y la potencia eléctrica no es estable ni constante a lo largo de los años. Cuando se observa toda la serie completa (2019–2025), la correlación entre temperatura y potencia es casi cero, lo que significa que, a gran escala, la temperatura por sí sola no explica toda la variación de la potencia. Sin embargo, cuando analizamos la correlación de manera dinámica (por ventanas de tiempo más pequeñas), encontramos momentos en los que sí existe una relación clara:
+
+    -   En algunos periodos, cuando la temperatura sube, también aumenta la potencia.
+    -   En otros periodos, sucede lo contrario.
+    -   A partir de 2022, la relación positiva entre temperatura y potencia se vuelve más frecuente.
+    -   Esto quiere decir que la temperatura sí influye en la demanda eléctrica, pero su impacto cambia con el tiempo, dependiendo de la estación, el año y las condiciones de uso de la energía.
+
+-   En resumen, la temperatura sí influye en la potencia eléctrica, pero no de forma simple ni constante. La demanda eléctrica depende de muchos factores, además del clima. Los modelos más flexibles (como Prophet con temperatura) son los que mejor se adaptan a estos cambios y ofrecen mejores pronósticos. Las relaciones entre temperatura y demanda deben analizarse en ventanas de tiempo, no solo con un promedio global, porque la realidad cambia día a día.
+
+## Conversión a tsibble
+
+Conversión de data frame en una estructura de serie temporal moderna (llamada )tsibble).
+
+```{r tsibble-creacion20000}
+datos_ts <- datos %>%
+  as_tsibble(index = fecha)
+
+datos_ts
+interval(datos_ts)
+```
+
+## Descomposición clásica
+
+Se realiza la descomposición clásica utilizando una frecuencia diaria:
+
+```{r descomposicion20000}
+datos_ts_diario <- datos_ts %>%
+  mutate(dia = as_date(fecha)) %>%
+  index_by(dia) %>%
+  summarise(potencia = mean(potencia, na.rm = TRUE))
+
+datos_ts_diario %>%
+  model(STL(potencia ~ season(window = "periodic"))) %>%
+  components() %>%
+  autoplot() +
+  labs(title = "Descomposición STL de la potencia (promedio diario)")
+```
+
+Esta descomposición separa la serie en:
+
+-   Tendencia (trend)
+
+-   Estacionalidad anual (season_year)
+
+-   Estacionalidad semanal (season_week)
+
+-   Residuo (remainder)
+
+-   **Serie original:** Se observa variabilidad considerable pero mucho más suave que la serie horaria, incremento claro desde 2019 hasta 2024, algunos días con caídas notorias (picos hacia abajo), probablemente por fallos o mantenimientos. El valor promedio estabilizado en niveles más altos a partir de 2023–2024.
+
+-   **Tendencia:** Se observa Crecimiento continuo (2019–2024), ligera caída o estabilización en 2025. La demanda promedio diaria de la subestación ha aumentado de manera sostenida, y el 2024 fue el año de mayor carga.
+
+-   **Estacionalidad anual:** Se observa oscilación clara con picos y valles repetitivos, esto indica que en ciertos meses (épocas cálidas), la potencia promedio aumenta y en meses más fríos o lluviosos: la potencia disminuye.
+
+-   **Estacionalidad semanal:** Se observa una onda casi perfecta semanal, prácticamente es un ciclo idéntico semana tras semana en todos los años.
+
+-   **Residuo:** La gráfica muestra lo que queda después de remover tendencia + estacionalidad anual + estacionalidad semanal. Refleja ruido operativo, variaciones abruptas del sistema, días atípicos o fallas, eventos puntuales no explicados por clima ni comportamiento habitual. Tambien se observan caídas fuertes en días aislados, debido posiblemente a fallas o apagones puntuales, mediciones erróneas, desconexiones programadas.
+
+-   La demanda eléctrica tiene un comportamiento altamente estructurado, sigue patrones muy claros y estables.
+
+-   Hay tres componentes que explican casi todo el comportamiento:
+
+    -   Tendencia creciente (más usuarios, más actividad, más calor, más uso eléctrico)
+    -   Estacionalidad anual marcada (cambios de clima y temporadas)
+    -   Estacionalidad semanal fuerte (actividad laboral)
+
+-   El residuo recoge pocas irregularidades, es ruido + eventos puntuales.
+
+-   El sistema eléctrico ha crecido año tras año, la carga base de la subestación es mucho mayor en 2023–2024 que en 2019–2020.
+
+## División de los datos en entrenamiento y prueba
+
+Se reserva un subconjunto final de la serie para evaluar la capacidad predictiva de los modelos. Los ultimos 6 meses se utilizan para la prueba de los modelos.
+
+```{r train-test200000}
+n_total <- nrow(datos_ts)
+n_test  <- 24 * 30 * 6  # 6 meses
+n_train <- n_total - n_test
+
+datos_train <- datos_ts %>% slice(1:n_train)
+datos_test  <- datos_ts %>% slice((n_train + 1):n_total)
+
+# Índices numéricos para Prophet original
+idx_train <- 1:n_train
+idx_test  <- (n_train + 1):n_total
+
+cat("Cantidad total de datos: ", n_total, "\n")
+cat("Cantidad de datos para entrenamiento: ", n_train, "\n")
+cat("Cantidad de datos para prueba: ", n_test, "\n")
+
+```
+
+## Ajuste de modelos ARIMA, ETS y Prophet
+
+En esta sección se ajustan tres modelos sobre el conjunto de entrenamiento:
+
+-   **ARIMA**: modelo autorregresivo integrado de medias móviles.
+-   **ETS**: modelo de suavizamiento exponencial (Error, Trend, Seasonality).
+-   **Prophet**: modelo de regresión no lineal en el tiempo.
+
+### Modelos fable: ARIMAX (con `temp`) + ETS (sin regresor)
+
+```{r modelos-fable-con-temp20000}
+# Modelos dentro de fable:
+# - ARIMA con regresor externo (temp)
+# - ETS sin regresor
+
+modelos_fable <- datos_train %>%
+  model(
+    arima_x = ARIMA(potencia ~ temp),  # ARIMAX con regresor externo (temp)
+    ets    = ETS(potencia)            # ETS no admite regresores externos
+  )
+
+#report(modelos_fable)
+
+modelos_fable %>% select(arima_x) %>% report()
+
+```
+
+Modelo ARIMAX: **ARIMA(3,0,1)(2,1,0)[24] con regresor temperatura**
+
+Este modelo combina:
+
+-   Componente autorregresiva AR(3)
+
+-   Componente de media móvil MA(1)
+
+-   Componente estacional SAR(2) con período 24
+
+-   Una diferenciación estacional D=1
+
+-   Un regresor externo: la temperatura
+
+```{r}
+
+modelos_fable %>% select(ets)     %>% report()
+
+```
+
+Modelo **ETS(A,N,A)**
+
+Este es un modelo de:
+
+-   Error aditivo (A)
+
+-   Sin tendencia (N)
+
+-   Estacionalidad aditiva (A)
+
+Parámetros de suavizamiento:
+
+-   α (alpha) = 0.9659, El modelo da mucho peso a las observaciones recientes, casi reaccionando punto a punto. El nivel cambia muy rápido.
+
+-   γ (gamma) = 0.0217, la estacionalidad cambia muy lentamente.
+
+### Prophet con regresor `temp` (NO fable)
+
+Aquí usamos el paquete `prophet` de Facebook (no el de `fable.prophet`) para poder incluir `temp` como regresor.
+
+```{r prophet-original-con-temp, message=FALSE, warning=FALSE}
+# Data frame de entrenamiento para Prophet: ds (fecha), y (potencia), temp (regresor)
+df_train_prophet <- datos %>%
+  slice(idx_train) %>%
+  transmute(
+    ds   = fecha,
+    y    = potencia,
+    temp = temp
+  )
+
+# Definir modelo Prophet con regresor externo temp
+m_prophet <- prophet()
+m_prophet <- add_regressor(m_prophet, 'temp')
+
+# Ajustar el modelo
+m_prophet <- fit.prophet(m_prophet, df_train_prophet)
+
+# Data frame de TEST para Prophet (mismas fechas que datos_test)
+df_test_prophet <- datos %>%
+  slice(idx_test) %>%
+  transmute(
+    ds   = fecha,
+    temp = temp
+  )
+
+# Pronóstico de Prophet sobre el periodo de TEST
+fc_prophet_test <- predict(m_prophet, df_test_prophet)
+
+head(fc_prophet_test)
+
+```
+
+Prophet descompone el pronóstico en:
+
+-   trend → tendencia general a largo plazo
+
+-   daily → patrón diario (sube en horas de mayor actividad, baja en madrugada)
+
+-   weekly → patrón semanal (días laborales vs. fines de semana)
+
+-   yearly → patrón estacional anual (clima/temporada)
+
+-   extra_regressors_additive → efecto de la temperatura
+
+-   additive_terms → suma de daily + weekly + yearly + regresores
+
+-   yhat → valor pronosticado final
+
+-   yhat_lower / yhat_upper → intervalo de confianza
+
+yhat=trend+daily+weekly+yearly+regressors+remainder
+
+-   La tendencia muestra que la demanda en 2025 es alta, rondando los 4400 kW.
+
+-   A primera hora (8am), la demanda es relativamente baja, pero sube rápidamente hacia el mediodía.
+
+-   La temperatura juega un papel importante, cuando sube, la potencia aumenta significativamente (entre +75 y +176 kW).
+
+-   La estacionalidad semanal y anual agregan una contribución positiva estable.
+
+-   Prophet interpreta que en esa fecha (pronóstico) la demanda eléctrica estará subiendo durante la mañana, impulsada sobre todo por el calor del día y el patrón típico diario.
+
+## Pronósticos y comparación de métricas
+
+Ahora generamos pronósticos para el mismo horizonte de `datos_test` con:
+
+-   ARIMAX + ETS vía fable\
+-   Prophet con regresor `temp`
+
+```{r comparacion-metricas-arimax-ets-prophet2000, message=FALSE, warning=FALSE}
+# 4.1 Pronósticos fable en TEST (usando datos_test como new_data)
+fc_fable_test <- modelos_fable %>%
+  forecast(new_data = datos_test)
+
+# Métricas para modelos fable (ARIMAX y ETS)
+acc_fable <- fc_fable_test %>%
+  accuracy(datos_test) %>%
+  filter(.type == "Test") %>%
+  select(.model, RMSE, MAE, MAPE)
+
+#acc_fable
+
+# 4.2 Métricas para Prophet original con temp
+# Observado (y_real) y pronosticado (yhat_prophet) en TEST
+# 4.2 Métricas para Prophet original con temp
+# Observado (y_real) y pronosticado (y_hat_p) en TEST
+y_real  <- datos$potencia[idx_test]
+y_hat_p <- fc_prophet_test$yhat
+
+# Construimos un data frame para yardstick
+df_eval_prophet <- tibble(
+  truth    = y_real,
+  estimate = y_hat_p
+)
+
+# Usar SIEMPRE las funciones de yardstick, con namespace explícito
+rmse_p <- yardstick::rmse(
+  df_eval_prophet,
+  truth   = truth,
+  estimate = estimate
+)$.estimate
+
+mae_p <- yardstick::mae(
+  df_eval_prophet,
+  truth   = truth,
+  estimate = estimate
+)$.estimate
+
+mape_p <- yardstick::mape(
+  df_eval_prophet,
+  truth   = truth,
+  estimate = estimate
+)$.estimate * 100
+
+acc_prophet <- tibble(
+  .model = "prophet_x_temp",
+  RMSE   = rmse_p,
+  MAE    = mae_p,
+  MAPE   = mape_p
+)
+
+
+```
+
+-   **RMSE (Root Mean Square Error)**: mide el error cuadrático promedio. Penaliza fuertemente errores grandes.
+
+-   **MAE (Mean Absolute Error)**: mide el error absoluto promedio. Más fácil de interpretar.
+
+-   **MAPE (Mean Absolute Percentage Error)**: mide error porcentual, pero cuando la serie tiene valores cercanos a cero, se vuelve inválido (por eso aparece "Inf").
+
+-   **Prophet(temp) es el mejor modelo**, tiene las métricas más bajas, (RMSE=477.23) y (MAE=316.46). Esto indica que Prophet con temperatura:
+
+    -   Produce pronósticos más cercanos a los valores reales.
+    -   Captura mejor los patrones de la serie (tendencias + estacionalidades).
+    -   Incorpora de manera efectiva la variable externa temperatura.
+    -   Maneja bien las fluctuaciones y picos.
+
+-   **ETS tuvo un desempeño aceptable**, pero al no usar temperatura, no puede competir con Prophet.
+
+-   **ARIMA con temperatura fue el menos preciso**, probablemente porque la serie es demasiado variable y estacional para un ARIMA clásico.
+
+### Comparación gráfica de los pronósticos
+
+Unimos pronósticos de ARIMAX, ETS y Prophet (con temp) sobre el conjunto de prueba y los visualizamos junto con los datos reales de potencia.
+
+```{r grafico-comparado-pronosticos-temp20000, message=FALSE, warning=FALSE}
+
+# Rango de fechas del TEST
+inicio_test <- min(datos_test$fecha)
+fin_test    <- max(datos_test$fecha)
+
+# Preparar pronósticos fable en formato largo
+fc_fable_long <- fc_fable_test %>%
+  as_tibble() %>%
+  select(fecha = fecha, .model, .mean)
+
+# Preparar pronósticos Prophet en el mismo formato
+fc_prophet_long <- tibble(
+  fecha  = df_test_prophet$ds,
+  .model = "prophet_x_temp",
+  .mean  = y_hat_p
+)
+
+# Unir todos los pronósticos
+fc_todos <- bind_rows(
+  fc_fable_long,
+  fc_prophet_long
+)
+
+# Datos reales en TEST
+datos_test_df <- datos %>%
+  slice(idx_test) %>%
+  select(fecha, potencia)
+
+# Gráfico interactivo
+fig_fc <- plot_ly()
+
+# Serie real
+fig_fc <- fig_fc %>%
+  add_lines(
+    data = datos_test_df,
+    x = ~fecha,
+    y = ~potencia,
+    name = "Real",
+    line = list(color = "black")
+  )
+
+# ARIMAX y ETS
+fig_fc <- fig_fc %>%
+  add_lines(
+    data = fc_todos %>% filter(.model == "arima_x"),
+    x = ~fecha,
+    y = ~.mean,
+    name = "ARIMAX (temp)",
+    line = list(color = "blue")
+  ) %>%
+  add_lines(
+    data = fc_todos %>% filter(.model == "ets"),
+    x = ~fecha,
+    y = ~.mean,
+    name = "ETS",
+    line = list(color = "green")
+  )
+
+# Prophet con temp
+fig_fc <- fig_fc %>%
+  add_lines(
+    data = fc_todos %>% filter(.model == "prophet_x_temp"),
+    x = ~fecha,
+    y = ~.mean,
+    name = "Prophet (temp)",
+    line = list(color = "red")
+  )
+
+fig_fc <- fig_fc %>%
+  layout(
+    title = "Comparación de Pronósticos en TEST: ARIMAX(temp), ETS y Prophet(temp)",
+    xaxis = list(title = "Fecha"),
+    yaxis = list(title = "Potencia"),
+    legend = list(x = 1.05, y = 0.5)
+  )
+
+fig_fc
+
+```
+
+-   Prophet(temp) modela muy bien la forma general de los ciclos diarios y semanales, y ajusta la influencia de la temperatura, pero no reproduce fluctuaciones extremas. Es el modelo más estable y con mejor error promedio (RMSE y MAE).
+
+-   Prophet(temp) es el modelo que mejor reproduce el comportamiento real del sistema eléctrico, esto se debe a que captura múltiples estacionalidades (diaria, semanal, anual), integra la temperatura como regresor externo, se ajusta rápidamente a cambios en el nivel de la demanda, suaviza correctamente el ruido sin perder la forma del ciclo.
+
+-   ETS captura la estacionalidad diaria pero le cuesta adaptarse a variaciones rápidas. Funciona bien para detectar patrones estables pero no para fluctuaciones intensas.
+
+-   ETS ocupa un segundo lugar, captura el patrón diario, pero no usa temperatura, tiene menos flexibilidad.
+
+-   ARIMAX(temp) logra capturar estacionalidad diaria, pero falla en ajustar tendencias o cambios estructurales del sistema. Es el modelo que peor se adapta al periodo de prueba (más alto RMSE y MAE).
+
+-   ARIMAX(temp) queda en tercer lugar, aunque incorpora temperatura, no logra captar bien la variación real ni cambios repentinos, su estacionalidad es rígida y menos adaptativa.
+
+## Diagnóstico de residuos Prophet
+
+```{r diagnostico-residuos-prophet20000, message=FALSE, warning=FALSE}
+
+# 1. Obtener valores ajustados en TRAIN usando predict()
+#    (usamos las mismas filas y regresores que df_train_prophet)
+future_train <- df_train_prophet %>%
+  select(ds, temp)
+
+fc_train_prophet <- predict(m_prophet, future_train)
+
+# 2. Cálculo de residuos en TRAIN
+y_real_train <- df_train_prophet$y
+y_fitted     <- fc_train_prophet$yhat
+
+res_prophet  <- y_real_train - y_fitted
+
+# 3. Convertir a tibble con fecha
+df_res_prophet <- tibble(
+  fecha   = df_train_prophet$ds,
+  residuo = res_prophet
+)
+
+# 4. Gráficos de diagnóstico
+
+p1 <- ggplot(df_res_prophet, aes(x = fecha, y = residuo)) +
+  geom_line(color = "steelblue") +
+  labs(title = "Residuos del modelo Prophet(temp)", x = "Fecha", y = "Residuo")
+
+p2 <- ggplot(df_res_prophet, aes(x = residuo)) +
+  geom_histogram(bins = 40, fill = "gray70", color = "black") +
+  labs(title = "Histograma de residuos Prophet(temp)")
+
+p3 <- ggAcf(df_res_prophet$residuo) +
+  labs(title = "ACF de residuos Prophet(temp)")
+
+p4 <- ggPacf(df_res_prophet$residuo) +
+  labs(title = "PACF de residuos Prophet(temp)")
+
+p5 <- ggplot(df_res_prophet, aes(sample = residuo)) +
+  stat_qq() +
+  stat_qq_line() +
+  labs(title = "QQ-Plot residuos Prophet(temp)")
+
+# 5. Prueba de Ljung-Box (ejemplo con 24 rezagos)
+lb <- Box.test(df_res_prophet$residuo, lag = 24, type = "Ljung-Box")
+lb
+
+# Mostrar gráficos (puedes organizarlos como prefieras)
+p1
+p2
+p3
+p4
+p5
+
+
+```
+
+-   **Serie temporal de residuos:** permite ver patrones no capturados: Prophet(temp) captura la tendencia general y la forma diaria/semanal, pero no explica bien valores atípicos, no modela eventos anómalos (cortes, mantenimientos) y queda ruido significativo sin explicar, como ocurre en series energéticas reales.
+
+-   **Histograma:** evalúa normalidad: No hay normalidad perfecta. La cola izquierda larga indica días con demanda real anormalmente baja, errores grandes por valores reales cercanos a cero. El modelo tiende a sobreestimar en estos episodios.
+
+-   **ACF / PACF:** evalúa autocorrelación; ruido blanco es lo deseable:
+
+-   De la gráfica ACF se interpeta que los residuos no son ruido blanco. Prophet(temp) captura bien parte de la estacionalidad, pero no elimina completamente la dependencia temporal. Esto ocurre porque la serie tiene estacionalidad horaria MUY intensa, Prophet usa Fourier para estacionalidad diaria pero no siempre capta ciclos exactos hora a hora. El modelo aún deja información rutinaria sin explicar.
+
+-   De la gráfica PACF se confirma la presencia de autocorrelación estructural. Prophet(temp) no elimina la memoria de la serie, porque la serie horaria es extremadamente autocorrelacionada, la estacionalidad diaria es compleja.
+
+-   **QQ-plot:** inspección visual de normalidad: Los residuos NO son normales. La asimetría se debe a valores reales extremadamente bajos (≈ 0), picos altos que tampoco son siempre capturados, alta variabilidad intradía no totalmente modelada. Prophet(temp) cumple su función de tendencia + estacionalidad + regresor, pero la serie contiene outliers y ruido estructurado que no encajan con supuestos normales.
+
+-   **Ljung–Box:** evalúa si quedan patrones no explicados (H0 = residuos sin autocorrelación): p-value \< 2.2e–16 (extremadamente pequeño), rechazamos con claridad la hipótesis nula del test. Los residuos NO son ruido blanco.
+
+-   Los residuos del modelo Prophet(temp) muestran que el modelo captura bien la tendencia y las estacionalidades, pero aún deja patrones no explicados. Persisten autocorrelaciones altas, especialmente a nivel horario y diario, y la distribución de los errores tiene colas pesadas por eventos atípicos en la demanda. En consecuencia, aunque Prophet(temp) ofrece los mejores pronósticos entre los modelos evaluados, sus residuos no son completamente aleatorios, lo cual es normal en series eléctricas reales con alta variabilidad y picos extremos.
+
+------------------------------------------------------------------------
+
+### Resumen numérico de residuos (media, sd, skewness, kurtosis)
+
+```{r resumen-numerico-residuos20000, message=FALSE, warning=FALSE}
+
+# 1. Residuos ARIMAX y ETS desde modelos_fable
+res_fable <- modelos_fable %>%
+  augment() %>%        # agrega .fitted, .resid, .innov, etc.
+  as_tibble()
+
+# Seleccionamos solo lo necesario
+res_fable_long <- res_fable %>%
+  select(.model, fecha, resid = .resid)
+
+# 2. Residuos Prophet(temp) desde df_res_prophet (creado en el chunk anterior)
+res_prophet_tbl <- df_res_prophet %>%
+  transmute(
+    .model = "prophet_x_temp",
+    fecha,
+    resid = residuo
+  )
+
+# 3. Unimos todos los residuos
+resid_all <- bind_rows(
+  res_fable_long,
+  res_prophet_tbl
+)
+
+# 4. Resumen numérico: media, sd, skewness, kurtosis
+resumen_residuos <- resid_all %>%
+  group_by(.model) %>%
+  summarise(
+    mean   = mean(resid, na.rm = TRUE),
+    sd     = sd(resid, na.rm = TRUE),
+    skew   = moments::skewness(resid, na.rm = TRUE),
+    kurt   = moments::kurtosis(resid, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+resumen_residuos %>%
+  mutate(
+    mean = round(mean, 2),
+    sd   = round(sd, 2),
+    skew = round(skew, 3),
+    kurt = round(kurt, 3)
+  ) %>%
+  knitr::kable(
+    caption = "Resumen numérico de residuos: ARIMAX(temp), ETS y Prophet(temp)",
+    digits = 2
+  )
+
+```
+
+-   **mean**: media del residuo (ideal \~ 0): Todos los promedios son cercanos a 0. Los tres modelos no presentan sesgo sistemático
+
+-   **sd**: desviación estándar: ETS tiene menor dispersión, mientras que Prophet(temp) tiene la más alta. Prophet suaviza la serie cuando la serie real tiene picos o desplomes extremos, los residuos se vuelven muy grandes. Prophet evita sobreajustar picos extremos.
+
+-   **skew**: asimetría (0 ≈ distribución simétrica): arima_x (ligera cola hacia errores negativos), ETS (casi simétrico), prophet_x_temp (fuerte cola negativa (muchos errores negativos grandes)). Prophet tiene fuerte skew negativo porque no predice caídas inesperadas, lo cual es normal y esperable.
+
+-   **kurt**: curtosis (3 ≈ normal; \>3 colas más pesadas): los residuos de ARIMAX y ETS tienen muchísimos valores atípicos, errores extremos frecuentes, sensibilidad alta al ruido de la serie. Prophet, en cambio suaviza, no persigue los picos extremos, produce residuos menos extremos.Prophet(temp) presenta una mejor distribución, con menos outliers extremos comparado con ETS y ARIMA.
+
+-   Prophet(temp) es el modelo con mejor comportamiento global en residuos, pues aunque su desviación estándar es mayor, su distribución es mucho más razonable (baja curtosis) y su media es prácticamente cero.
+
+-   ETS y ARIMAX tienen residuos menos dispersos, pero con colas extremadamente pesadas, lo cual indica que producen errores extremos con mucha frecuencia.
+
+-   En modelos de series energéticas —con picos y caídas bruscas— esto favorece a Prophet, que maneja mejor la forma general del proceso y evita el sobreajuste.
+
+### Comparación gráfica de residuos (ARIMAX, ETS, Prophet)
+
+```{r panel-comparativo-residuos, message=FALSE, warning=FALSE}
+library(ggplot2)
+
+# Usamos el mismo objeto resid_all del chunk anterior
+# (si quieres que este chunk sea independiente,
+#  copia también la construcción de resid_all aquí)
+
+p_res <- ggplot(resid_all, aes(x = fecha, y = resid)) +
+  geom_line(color = "steelblue") +
+  facet_wrap(~ .model, ncol = 1, scales = "free_y") +
+  labs(
+    title = "Comparación de residuos: ARIMAX(temp), ETS y Prophet(temp)",
+    x = "Fecha",
+    y = "Residuo"
+  ) +
+  theme_minimal()
+
+p_res
+
+```
+
+* El análisis visual de los residuos muestra que ningún modelo captura completamente la dinámica de la serie, lo cual es normal en datos eléctricos horarios. Sin embargo, Prophet(temp) presenta el mejor comportamiento global:
+  * Menor cantidad de outliers extremos respecto a ETS y ARIMA.
+  * Residuos más estables a largo plazo.
+  * Mejor adaptación a cambios estructurales, aunque con picos negativos severos cuando la serie real cae abruptamente.
+
+* ETS y ARIMAX(temp) generan residuos más ruidosos y con picos más frecuentes, señal de que no modelan adecuadamente toda la estructura temporal ni los efectos externos.
+
+## Conclusiones
+
+-   Los resultados obtenidos en este ejercicio, donde se compararon tres enfoques de modelamiento —ARIMAX con temperatura como regresor, ETS univariante y Prophet con regresor externo— permiten desarrollar conclusiones desde las métricas:
+
+-   El RMSE sugiere que **Prophet con temperatura como regresor externo fue el mejor modelo**, seguido por ETS y, en último lugar, el modelo ARIMAX. Sin embargo, el MAPE resultó infinito en los tres modelos, lo que se explica por la presencia de valores extremadamente bajos (cercanos a cero) en la demanda real durante el periodo de evaluación, haciendo imposible calcular correctamente el error porcentual.
+
+-   Dado este comportamiento, el RMSE y el MAE son métricas más apropiadas para esta serie. Bajo estas métricas, **Prophet(temp) se posiciona como el modelo más preciso en el periodo analizado**.
+
+-   El modelo ARIMAX obtuvo la siguiente especificación:
+
+-   ARIMA(3,0,1)(2,1,0)[24] con un regresor externo temp
+
+-   β_temp = **4.91**, altamente significativo
+
+-   Esto sugiere que, en promedio, un aumento de 1°C en la temperatura produce un aumento esperado de 4.9 unidades en la potencia, manteniendo constantes los efectos temporales capturados por el ARIMA.
+
+-   Este resultado indica que **la temperatura sí posee un efecto directo sobre la serie**, aunque la magnitud del coeficiente debe interpretarse en el contexto de los niveles de potencia.
+
+-   Por su parte, ETS(A,N,A) mostró una estructura suave y flexible, pero su desempeño en TEST fue inferior a Prophet(temp) y mayormente influido por la fuerte variabilidad de la serie.
+
+-   Prophet(temp) logró capturar tendencias y estacionalidades con mayor estabilidad, especialmente ante eventos abruptos. Su estructura aditiva y su capacidad para incorporar regresores externos favorecieron un mejor ajuste al comportamiento real durante el horizonte de prueba.
+
+-   El análisis de residuos del modelo Prophet(temp) mostró:
+
+-   Residuos con distribución aproximadamente simétrica.
+
+-   Presencia de autocorrelación moderada, aunque menor que en ARIMAX.
+
+-   QQ-plot con colas más pesadas de lo esperado, lo que refleja la alta variabilidad de la serie.
+
+-   Ljung–Box significativo en varios rezagos, indicando que aún quedan patrones no capturados por el modelo.
+
+-   A pesar de estas limitaciones, **Prophet(temp) produjo los residuos más estables y homogéneos entre los tres modelos**, lo cual coincide con su mejor desempeño en RMSE y MAE.
+
+-   La inclusión de la temperatura como variable explicativa mostró ser relevante, tanto en Prophet como en ARIMAX, aunque la capacidad de Prophet para modelar tendencias no lineales y estacionalidades complejas lo hizo más robusto para este conjunto de datos.
+
+-   Es importante destacar que la serie contiene valores atípicos y caídas abruptas cercanas a cero, lo cual afecta la estabilidad del MAPE y dificulta la estimación de modelos puramente aditivos.
+
+-   En conjunto, se concluye que **Prophet con temperatura como regresor externo es el modelo más adecuado para el pronóstico de potencia eléctrica en este caso específico**, dada su mayor estabilidad, menor error cuadrático y mejor manejo de la alta variabilidad y de los patrones abruptos presentes en la serie.
+
+-   No obstante, el ARIMAX(temp) proporciona información valiosa sobre el efecto directo de la temperatura, mientras que ETS constituye una alternativa simple y robusta en contextos de menor variabilidad.
